@@ -60,11 +60,11 @@ export function CheckoutModal({
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="relative w-full max-w-md bg-card border border-primary/30 shadow-[0_0_30px_rgba(0,229,255,0.15)] rounded-none overflow-hidden"
+            className="relative w-full max-w-md bg-card border border-primary/30 shadow-[0_0_30px_rgba(255,122,0,0.15)] rounded-none overflow-hidden"
           >
             <div className="corner-tl"></div><div className="corner-tr"></div><div className="corner-bl"></div><div className="corner-br"></div>
             
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,rgba(0,229,255,0.5)_2px,rgba(0,229,255,0.5)_4px)]"></div>
+            <div className="absolute top-0 left-0 right-0 h-1 bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,rgba(255,122,0,0.5)_2px,rgba(255,122,0,0.5)_4px)]"></div>
 
             <div className="flex justify-between items-center p-4 border-b border-primary/20 bg-black/50 pt-6">
               <h2 className="text-sm font-display font-bold text-primary tracking-widest uppercase">// CHECKOUT SEQUENCE</h2>
@@ -87,7 +87,7 @@ export function CheckoutModal({
                   <h3 className="text-sm font-display font-bold text-white tracking-wider">{product.name}</h3>
                   <p className="text-xs text-primary font-sans">{variant.name}</p>
                 </div>
-                <div className="text-primary font-display font-bold relative z-10 drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]">
+                <div className="text-primary font-display font-bold relative z-10 drop-shadow-[0_0_5px_rgba(255,122,0,0.5)]">
                   ${variant.price.toFixed(2)}
                 </div>
               </div>
@@ -144,7 +144,7 @@ export function CheckoutModal({
 
                    <button
                      onClick={handlePayment}
-                     className="w-full bg-primary/10 border border-primary hover:bg-primary hover:text-black text-primary font-display font-bold py-3 px-4 rounded-none shadow-[0_0_15px_rgba(0,229,255,0.2)] transition-all flex justify-center items-center gap-2 text-sm tracking-widest uppercase mt-4"
+                      className="w-full bg-primary/10 border border-primary hover:bg-primary hover:text-black text-primary font-display font-bold py-3 px-4 rounded-none shadow-[0_0_15px_rgba(255,122,0,0.2)] transition-all flex justify-center items-center gap-2 text-sm tracking-widest uppercase mt-4"
                    >
                      [ PROCEED TO PAYMENT → ]
                    </button>

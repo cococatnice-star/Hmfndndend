@@ -25,7 +25,7 @@ export default function Products() {
     <div className="min-h-screen bg-transparent w-full py-12 px-4 relative">
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="mb-10 border-b border-primary/20 pb-6 relative">
-          <div className="absolute bottom-0 left-0 w-48 h-[1px] bg-primary drop-shadow-[0_0_5px_rgba(0,229,255,0.8)]"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-[1px] bg-primary drop-shadow-[0_0_5px_rgba(255,122,0,0.8)]"></div>
           <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-4 uppercase tracking-widest">
             <span className="text-primary mr-3">//</span>PRODUCT CATALOG
           </h1>
@@ -44,7 +44,7 @@ export default function Products() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-5 py-2 text-xs font-display font-bold uppercase tracking-widest whitespace-nowrap transition-all border ${
                   activeTab === tab 
-                    ? "bg-primary/10 border-primary text-primary shadow-[0_4px_15px_-3px_rgba(0,229,255,0.3)]" 
+                    ? "bg-primary/10 border-primary text-primary shadow-[0_4px_15px_-3px_rgba(255,122,0,0.3)]" 
                     : "bg-black border-primary/30 text-muted-foreground hover:text-primary hover:border-primary/60"
                 }`}
               >

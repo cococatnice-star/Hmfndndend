@@ -20,14 +20,14 @@ export function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-[#050d1a]/80 border-b border-primary/30 shadow-[0_1px_15px_rgba(0,229,255,0.1)]">
+    <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-[#050d1a]/80 border-b border-primary/30 shadow-[0_1px_15px_rgba(255,122,0,0.1)]">
       <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-50 animate-pulse"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <Zap className="h-6 w-6 text-primary drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]" />
-              <span className="text-xl font-bold font-display tracking-tight text-white drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]">MEOWCHEATZ</span>
+              <Zap className="h-6 w-6 text-primary drop-shadow-[0_0_8px_rgba(255,122,0,0.8)]" />
+              <span className="text-xl font-bold font-display tracking-tight text-white drop-shadow-[0_0_5px_rgba(255,122,0,0.5)]">MEOWCHEATZ</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-6 text-xs font-display tracking-widest uppercase text-muted-foreground">
@@ -59,7 +59,7 @@ export function Navbar() {
 
             <button
               onClick={() => toast({ title: "SEARCH SYSTEMS", description: "Use the catalog search to find a product." })}
-              className="hover:text-primary hover:drop-shadow-[0_0_5px_rgba(0,229,255,0.8)] transition-all"
+              className="hover:text-primary hover:drop-shadow-[0_0_5px_rgba(255,122,0,0.8)] transition-all"
               data-testid="button-search"
               aria-label="Open search"
             >
@@ -67,7 +67,7 @@ export function Navbar() {
             </button>
             <button
               onClick={() => toast({ title: "CART EMPTY", description: "Add a system from the catalog to begin." })}
-              className="relative hover:text-primary hover:drop-shadow-[0_0_5px_rgba(0,229,255,0.8)] transition-all"
+              className="relative hover:text-primary hover:drop-shadow-[0_0_5px_rgba(255,122,0,0.8)] transition-all"
               data-testid="button-cart"
               aria-label="Open cart"
             >
@@ -78,7 +78,7 @@ export function Navbar() {
             </button>
             <button
               onClick={() => toast({ title: "SCHEDULE", description: "No upcoming events are scheduled." })}
-              className="hover:text-primary hover:drop-shadow-[0_0_5px_rgba(0,229,255,0.8)] transition-all hidden sm:block"
+              className="hover:text-primary hover:drop-shadow-[0_0_5px_rgba(255,122,0,0.8)] transition-all hidden sm:block"
               data-testid="button-calendar"
               aria-label="Open schedule"
             >
@@ -86,7 +86,7 @@ export function Navbar() {
             </button>
             <button
               onClick={() => toast({ title: "NOTIFICATIONS", description: "You have no new notifications." })}
-              className="hover:text-primary hover:drop-shadow-[0_0_5px_rgba(0,229,255,0.8)] transition-all hidden sm:block"
+              className="hover:text-primary hover:drop-shadow-[0_0_5px_rgba(255,122,0,0.8)] transition-all hidden sm:block"
               data-testid="button-bell"
               aria-label="Open notifications"
             >
@@ -95,7 +95,7 @@ export function Navbar() {
             
             <button
               onClick={() => setAccountOpen(true)}
-              className="flex items-center justify-center gap-2 border border-primary text-primary hover:bg-primary/20 hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] transition-all font-display text-xs tracking-widest uppercase px-3 py-2 ml-2 rounded-none"
+              className="flex items-center justify-center gap-2 border border-primary text-primary hover:bg-primary/20 hover:shadow-[0_0_15px_rgba(255,122,0,0.3)] transition-all font-display text-xs tracking-widest uppercase px-3 py-2 ml-2 rounded-none"
               data-testid="button-account"
               aria-label="Open account portal"
             >
@@ -112,7 +112,7 @@ export function Navbar() {
             onClick={() => setAccountOpen(false)}
             aria-label="Close account portal"
           />
-          <div className="relative w-full max-w-md border border-primary/40 bg-card p-6 shadow-[0_0_35px_rgba(0,229,255,0.2)]">
+          <div className="relative w-full max-w-md border border-primary/40 bg-card p-6 shadow-[0_0_35px_rgba(255,122,0,0.2)]">
             <div className="corner-tl"></div><div className="corner-tr"></div><div className="corner-bl"></div><div className="corner-br"></div>
             <div className="flex items-center justify-between border-b border-primary/20 pb-4">
               <h2 className="font-display text-sm font-bold tracking-widest text-primary uppercase">// ACCOUNT PORTAL</h2>

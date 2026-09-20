@@ -47,9 +47,9 @@ export function LivePurchaseNotification() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -20, scale: 0.9 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="w-72 bg-card border border-primary/30 shadow-[0_0_15px_rgba(0,229,255,0.15)] rounded-none p-3 flex gap-3 pointer-events-auto relative overflow-hidden"
+            className="w-72 bg-card border border-primary/30 shadow-[0_0_15px_rgba(255,122,0,0.15)] rounded-none p-3 flex gap-3 pointer-events-auto relative overflow-hidden"
           >
-            <div className="absolute top-0 left-0 w-1 h-full bg-primary shadow-[0_0_8px_rgba(0,229,255,0.8)]"></div>
+            <div className="absolute top-0 left-0 w-1 h-full bg-primary shadow-[0_0_8px_rgba(255,122,0,0.8)]"></div>
             
             <div className="h-10 w-10 shrink-0 bg-primary/10 flex items-center justify-center text-primary font-display font-bold text-lg border border-primary/50 shadow-inner ml-2" style={{clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)"}}>
               {current.name[0]}
@@ -61,7 +61,7 @@ export function LivePurchaseNotification() {
                 <span className="text-white/50">{current.time}</span>
               </div>
               <div className="text-sm font-display font-bold text-white truncate tracking-wider">{current.name} : {current.product}</div>
-              <div className="text-xs text-primary font-display font-bold drop-shadow-[0_0_3px_rgba(0,229,255,0.5)] mt-0.5">{current.price}</div>
+              <div className="text-xs text-primary font-display font-bold drop-shadow-[0_0_3px_rgba(255,122,0,0.5)] mt-0.5">{current.price}</div>
             </div>
             <button 
               onClick={() => setIsVisible(false)}

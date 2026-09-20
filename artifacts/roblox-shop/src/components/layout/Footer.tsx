@@ -7,8 +7,8 @@ export function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <Zap className="h-6 w-6 text-primary drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]" />
-            <span className="text-xl font-bold font-display tracking-tight text-white drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]">MEOWCHEATZ</span>
+            <Zap className="h-6 w-6 text-primary drop-shadow-[0_0_8px_rgba(255,122,0,0.8)]" />
+            <span className="text-xl font-bold font-display tracking-tight text-white drop-shadow-[0_0_5px_rgba(255,122,0,0.5)]">MEOWCHEATZ</span>
           </div>
           <div className="flex items-center gap-2 text-xs font-display tracking-widest text-emerald-400 mt-2">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse inline-block shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>

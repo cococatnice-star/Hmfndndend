@@ -39,7 +39,7 @@ export default function Home() {
         <div
           className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `repeating-linear-gradient(rgba(0,229,255,0.08) 0 1px, transparent 1px 100%), repeating-linear-gradient(90deg, rgba(0,229,255,0.08) 0 1px, transparent 1px 100%)`,
+            backgroundImage: `repeating-linear-gradient(rgba(255,122,0,0.08) 0 1px, transparent 1px 100%), repeating-linear-gradient(90deg, rgba(255,122,0,0.08) 0 1px, transparent 1px 100%)`,
             backgroundSize: "40px 40px",
           }}
         />
@@ -49,7 +49,7 @@ export default function Home() {
           <div>E SIGN IS COMING SOON</div>
         </div>
 
-        <div className="relative z-10 w-full max-w-xl border border-primary/30 bg-black/50 p-8 shadow-[0_0_40px_rgba(0,229,255,0.12)] sm:p-12">
+        <div className="relative z-10 w-full max-w-xl border border-primary/30 bg-black/50 p-8 shadow-[0_0_40px_rgba(255,122,0,0.12)] sm:p-12">
           <div className="mb-4 font-display text-xs tracking-[0.3em] text-primary">
             [ DELTA INSTALLATION PROTOCOL ]
           </div>
@@ -67,7 +67,7 @@ export default function Home() {
             <a
               href="itms-services://?action=download-manifest&url=https://cocox.wtf/manifest.plist"
               onClick={handleDeltaInstall}
-              className="w-full border border-primary bg-primary/10 px-8 py-4 font-display font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary hover:text-black hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] sm:w-auto"
+              className="w-full border border-primary bg-primary/10 px-8 py-4 font-display font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary hover:text-black hover:shadow-[0_0_30px_rgba(255,122,0,0.6)] sm:w-auto"
             >
               [ YES ]
             </a>
@@ -91,7 +91,7 @@ export default function Home() {
         {[...Array(15)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-primary rounded-full shadow-[0_0_5px_rgba(0,229,255,0.8)]"
+            className="absolute w-1 h-1 bg-primary rounded-full shadow-[0_0_5px_rgba(255,122,0,0.8)]"
             initial={{ 
               x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000), 
               y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
@@ -116,7 +116,7 @@ export default function Home() {
         
         {/* Faint circuit board SVG pattern */}
         <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10 L90 10 L90 90 L10 90 Z' stroke='%2300e5ff' stroke-width='0.5' fill='none' /%3E%3Cpath d='M30 30 L70 30 L70 70 L30 70 Z' stroke='%2300e5ff' stroke-width='0.5' fill='none' /%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10 L90 10 L90 90 L10 90 Z' stroke='%23ff7a00' stroke-width='0.5' fill='none' /%3E%3Cpath d='M30 30 L70 30 L70 70 L30 70 Z' stroke='%23ff7a00' stroke-width='0.5' fill='none' /%3E%3C/svg%3E")`,
           backgroundSize: '100px 100px'
         }}></div>
 
@@ -128,7 +128,7 @@ export default function Home() {
           >
             <h1 className="font-display font-black text-white leading-none tracking-tighter" style={{ fontSize: "clamp(3rem, 8vw, 7rem)" }}>
               UNLOCK THE<br />
-              <span className="text-primary drop-shadow-[0_0_30px_rgba(0,229,255,0.6)] glitch inline-block relative">
+              <span className="text-primary drop-shadow-[0_0_30px_rgba(255,122,0,0.6)] glitch inline-block relative">
                 IMPOSSIBLE
                 <span className="absolute top-0 left-0 -ml-[2px] text-primary opacity-50 clip-half-1">IMPOSSIBLE</span>
                 <span className="absolute top-0 left-0 ml-[2px] text-primary opacity-50 clip-half-2">IMPOSSIBLE</span>
@@ -151,7 +151,7 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link href="/products" className="w-full sm:w-auto bg-primary/10 border border-primary text-primary hover:bg-primary hover:text-black font-display font-bold uppercase tracking-widest py-4 px-8 rounded-sm shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] transition-all flex justify-center items-center gap-2">
+            <Link href="/products" className="w-full sm:w-auto bg-primary/10 border border-primary text-primary hover:bg-primary hover:text-black font-display font-bold uppercase tracking-widest py-4 px-8 rounded-sm shadow-[0_0_20px_rgba(255,122,0,0.3)] hover:shadow-[0_0_30px_rgba(255,122,0,0.6)] transition-all flex justify-center items-center gap-2">
               [ START MISSION ]
             </Link>
             <button
@@ -201,7 +201,7 @@ export default function Home() {
       <section className="py-24 px-4 bg-black/40 border-t border-primary/20 relative z-20">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-end mb-10 border-b border-primary/20 pb-4 relative">
-            <div className="absolute bottom-0 left-0 w-32 h-[1px] bg-primary drop-shadow-[0_0_5px_rgba(0,229,255,0.8)]"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-[1px] bg-primary drop-shadow-[0_0_5px_rgba(255,122,0,0.8)]"></div>
             <div>
               <h2 className="text-2xl md:text-3xl font-display font-bold text-white mb-2 uppercase tracking-wider">
                 <span className="text-primary mr-2">//</span>FEATURED SYSTEMS
@@ -235,7 +235,7 @@ export default function Home() {
             <div className="relative bg-card border border-primary/20 p-8 rounded-none flex flex-col items-center text-center hover:border-primary/50 transition-colors group overflow-hidden">
               <div className="corner-tl"></div><div className="corner-tr"></div><div className="corner-bl"></div><div className="corner-br"></div>
               <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="w-12 h-12 border border-primary/30 bg-black text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10 shadow-[0_0_15px_rgba(0,229,255,0.2)]">
+              <div className="w-12 h-12 border border-primary/30 bg-black text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10 shadow-[0_0_15px_rgba(255,122,0,0.2)]">
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div className="text-3xl font-display font-bold text-white mb-1 relative z-10">100K+</div>
@@ -245,7 +245,7 @@ export default function Home() {
             <div className="relative bg-card border border-primary/20 p-8 rounded-none flex flex-col items-center text-center hover:border-primary/50 transition-colors group overflow-hidden">
               <div className="corner-tl"></div><div className="corner-tr"></div><div className="corner-bl"></div><div className="corner-br"></div>
               <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="w-12 h-12 border border-primary/30 bg-black text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10 shadow-[0_0_15px_rgba(0,229,255,0.2)]">
+              <div className="w-12 h-12 border border-primary/30 bg-black text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10 shadow-[0_0_15px_rgba(255,122,0,0.2)]">
                 <Zap className="h-6 w-6" />
               </div>
               <div className="text-3xl font-display font-bold text-white mb-1 relative z-10">50+</div>
@@ -255,7 +255,7 @@ export default function Home() {
             <div className="relative bg-card border border-primary/20 p-8 rounded-none flex flex-col items-center text-center hover:border-primary/50 transition-colors group overflow-hidden">
               <div className="corner-tl"></div><div className="corner-tr"></div><div className="corner-bl"></div><div className="corner-br"></div>
               <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="w-12 h-12 border border-primary/30 bg-black text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10 shadow-[0_0_15px_rgba(0,229,255,0.2)]">
+              <div className="w-12 h-12 border border-primary/30 bg-black text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10 shadow-[0_0_15px_rgba(255,122,0,0.2)]">
                 <Clock className="h-6 w-6" />
               </div>
               <div className="text-3xl font-display font-bold text-white mb-1 relative z-10">INSTANT</div>
@@ -265,7 +265,7 @@ export default function Home() {
             <div className="relative bg-card border border-primary/20 p-8 rounded-none flex flex-col items-center text-center hover:border-primary/50 transition-colors group overflow-hidden">
               <div className="corner-tl"></div><div className="corner-tr"></div><div className="corner-bl"></div><div className="corner-br"></div>
               <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="w-12 h-12 border border-primary/30 bg-black text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10 shadow-[0_0_15px_rgba(0,229,255,0.2)]">
+              <div className="w-12 h-12 border border-primary/30 bg-black text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform relative z-10 shadow-[0_0_15px_rgba(255,122,0,0.2)]">
                 <HeadphonesIcon className="h-6 w-6" />
               </div>
               <div className="text-3xl font-display font-bold text-white mb-1 relative z-10">24/7</div>

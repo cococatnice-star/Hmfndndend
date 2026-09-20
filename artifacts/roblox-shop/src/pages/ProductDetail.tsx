@@ -51,7 +51,7 @@ export default function ProductDetail() {
             <div className={`relative aspect-video rounded-none bg-black border border-primary/30 overflow-hidden group`}>
               <div className="corner-tl"></div><div className="corner-tr"></div><div className="corner-bl"></div><div className="corner-br"></div>
               
-              <div className="absolute inset-0 bg-[repeating-linear-gradient(rgba(0,229,255,0.05)_0_1px,transparent_1px_4px)] pointer-events-none z-10 mix-blend-overlay"></div>
+              <div className="absolute inset-0 bg-[repeating-linear-gradient(rgba(255,122,0,0.05)_0_1px,transparent_1px_4px)] pointer-events-none z-10 mix-blend-overlay"></div>
 
               {isCocoxProduct && imageIdx === 0 ? (
                 <video
@@ -77,7 +77,7 @@ export default function ProductDetail() {
                   </div>
 
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="relative z-10 font-display font-bold text-white text-4xl uppercase tracking-widest drop-shadow-[0_0_10px_rgba(0,229,255,0.8)]">
+                    <span className="relative z-10 font-display font-bold text-white text-4xl uppercase tracking-widest drop-shadow-[0_0_10px_rgba(255,122,0,0.8)]">
                       {product.name}
                     </span>
                   </div>
@@ -86,33 +86,33 @@ export default function ProductDetail() {
               
               {/* Fake carousel overlay indicators */}
               <div className="absolute inset-0 flex items-center justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-                <button onClick={prevImage} className="pointer-events-auto w-10 h-10 rounded-none bg-black/80 backdrop-blur border border-primary text-primary flex items-center justify-center hover:bg-primary/20 hover:shadow-[0_0_10px_rgba(0,229,255,0.5)] transition-all">
+                <button onClick={prevImage} className="pointer-events-auto w-10 h-10 rounded-none bg-black/80 backdrop-blur border border-primary text-primary flex items-center justify-center hover:bg-primary/20 hover:shadow-[0_0_10px_rgba(255,122,0,0.5)] transition-all">
                   <ChevronLeft className="h-6 w-6" />
                 </button>
-                <button onClick={nextImage} className="pointer-events-auto w-10 h-10 rounded-none bg-black/80 backdrop-blur border border-primary text-primary flex items-center justify-center hover:bg-primary/20 hover:shadow-[0_0_10px_rgba(0,229,255,0.5)] transition-all">
+                <button onClick={nextImage} className="pointer-events-auto w-10 h-10 rounded-none bg-black/80 backdrop-blur border border-primary text-primary flex items-center justify-center hover:bg-primary/20 hover:shadow-[0_0_10px_rgba(255,122,0,0.5)] transition-all">
                   <ChevronRight className="h-6 w-6" />
                 </button>
               </div>
               
               <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20">
-                <div className={`w-3 h-1 ${imageIdx === 0 ? "bg-primary shadow-[0_0_5px_rgba(0,229,255,0.8)]" : "bg-primary/30"}`} />
-                <div className={`w-3 h-1 ${imageIdx === 1 ? "bg-primary shadow-[0_0_5px_rgba(0,229,255,0.8)]" : "bg-primary/30"}`} />
+                <div className={`w-3 h-1 ${imageIdx === 0 ? "bg-primary shadow-[0_0_5px_rgba(255,122,0,0.8)]" : "bg-primary/30"}`} />
+                <div className={`w-3 h-1 ${imageIdx === 1 ? "bg-primary shadow-[0_0_5px_rgba(255,122,0,0.8)]" : "bg-primary/30"}`} />
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div 
                 onClick={() => setImageIdx(0)}
-                className={`cursor-pointer aspect-video bg-black opacity-80 hover:opacity-100 transition-opacity border ${imageIdx === 0 ? "border-primary shadow-[0_0_10px_rgba(0,229,255,0.3)]" : "border-primary/20"} relative flex items-center justify-center`}
+                className={`cursor-pointer aspect-video bg-black opacity-80 hover:opacity-100 transition-opacity border ${imageIdx === 0 ? "border-primary shadow-[0_0_10px_rgba(255,122,0,0.3)]" : "border-primary/20"} relative flex items-center justify-center`}
               >
-                <div className="absolute inset-0 bg-[repeating-linear-gradient(rgba(0,229,255,0.05)_0_1px,transparent_1px_4px)] pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[repeating-linear-gradient(rgba(255,122,0,0.05)_0_1px,transparent_1px_4px)] pointer-events-none"></div>
                  <span className="font-display font-bold text-white text-xl uppercase tracking-widest opacity-50">VIEW 1</span>
               </div>
               <div 
                 onClick={() => setImageIdx(1)}
-                className={`cursor-pointer aspect-video bg-black opacity-80 hover:opacity-100 transition-opacity border ${imageIdx === 1 ? "border-primary shadow-[0_0_10px_rgba(0,229,255,0.3)]" : "border-primary/20"} relative flex items-center justify-center`}
+                className={`cursor-pointer aspect-video bg-black opacity-80 hover:opacity-100 transition-opacity border ${imageIdx === 1 ? "border-primary shadow-[0_0_10px_rgba(255,122,0,0.3)]" : "border-primary/20"} relative flex items-center justify-center`}
               >
-                 <div className="absolute inset-0 bg-[repeating-linear-gradient(rgba(0,229,255,0.05)_0_1px,transparent_1px_4px)] pointer-events-none"></div>
+                 <div className="absolute inset-0 bg-[repeating-linear-gradient(rgba(255,122,0,0.05)_0_1px,transparent_1px_4px)] pointer-events-none"></div>
                  <span className="font-display font-bold text-white text-xl uppercase tracking-widest opacity-50">VIEW 2</span>
               </div>
             </div>
@@ -125,7 +125,7 @@ export default function ProductDetail() {
                 [ {product.badge} ]
               </span>
               {product.bestDeal && (
-                <span className="bg-primary/10 text-primary text-[10px] font-display font-bold px-2 py-1 border border-primary uppercase tracking-widest drop-shadow-[0_0_5px_rgba(0,229,255,0.8)]">
+                <span className="bg-primary/10 text-primary text-[10px] font-display font-bold px-2 py-1 border border-primary uppercase tracking-widest drop-shadow-[0_0_5px_rgba(255,122,0,0.8)]">
                   ⚡ HIGHEST CLEARANCE
                 </span>
               )}
@@ -136,7 +136,7 @@ export default function ProductDetail() {
             </h1>
             
             <div className="flex items-center gap-3 mb-6">
-              <div className="flex text-primary drop-shadow-[0_0_3px_rgba(0,229,255,0.8)]">
+              <div className="flex text-primary drop-shadow-[0_0_3px_rgba(255,122,0,0.8)]">
                 <span className="mx-0.5">◆</span>
                 <span className="mx-0.5">◆</span>
                 <span className="mx-0.5">◆</span>
@@ -149,7 +149,7 @@ export default function ProductDetail() {
             
             <div className="mb-8">
               <div className="text-[10px] font-display font-bold text-muted-foreground uppercase tracking-widest mb-1">UNIT COST:</div>
-              <div className="text-4xl font-display font-bold text-primary drop-shadow-[0_0_15px_rgba(0,229,255,0.5)]">
+              <div className="text-4xl font-display font-bold text-primary drop-shadow-[0_0_15px_rgba(255,122,0,0.5)]">
                 ${selectedVariant.price.toFixed(2)}
               </div>
             </div>
@@ -163,7 +163,7 @@ export default function ProductDetail() {
                     onClick={() => setSelectedVariantIdx(idx)}
                     className={`relative p-3 border text-left transition-all flex items-center gap-3 font-sans ${
                       selectedVariantIdx === idx 
-                        ? "border-primary bg-primary/5 shadow-[0_0_15px_rgba(0,229,255,0.15)] text-primary" 
+                        ? "border-primary bg-primary/5 shadow-[0_0_15px_rgba(255,122,0,0.15)] text-primary"
                         : "border-primary/20 bg-black hover:border-primary/50 text-muted-foreground"
                     }`}
                   >
@@ -180,7 +180,7 @@ export default function ProductDetail() {
                       ${variant.price.toFixed(2)}
                     </span>
                     {selectedVariantIdx === idx && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_5px_rgba(0,229,255,0.8)]" />
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_5px_rgba(255,122,0,0.8)]" />
                     )}
                   </button>
                 ))}
@@ -203,7 +203,7 @@ export default function ProductDetail() {
                   setCheckoutPaymentMethod("website");
                   setIsCheckoutOpen(true);
                 }}
-                className="flex-1 bg-primary/10 border border-primary hover:bg-primary hover:text-black text-primary font-display font-bold uppercase tracking-widest py-4 px-8 rounded-none shadow-[0_0_20px_rgba(0,229,255,0.2)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] transition-all flex justify-center items-center gap-2 text-sm"
+                className="flex-1 bg-primary/10 border border-primary hover:bg-primary hover:text-black text-primary font-display font-bold uppercase tracking-widest py-4 px-8 rounded-none shadow-[0_0_20px_rgba(255,122,0,0.2)] hover:shadow-[0_0_30px_rgba(255,122,0,0.6)] transition-all flex justify-center items-center gap-2 text-sm"
               >
                 [ INITIATE PURCHASE ]
               </button>
@@ -242,7 +242,7 @@ export default function ProductDetail() {
               >
                 [ {tab} ] {tab === "FIELD REPORTS" && "(25K+)"}
                 {activeTab === tab && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary shadow-[0_0_8px_rgba(0,229,255,0.8)]" />
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary shadow-[0_0_8px_rgba(255,122,0,0.8)]" />
                 )}
               </button>
             ))}
@@ -306,7 +306,7 @@ export default function ProductDetail() {
                       </div>
                       <span className="font-display font-bold text-white tracking-widest">{rev.n}</span>
                     </div>
-                    <div className="flex text-primary text-[10px] drop-shadow-[0_0_3px_rgba(0,229,255,0.8)]">
+                    <div className="flex text-primary text-[10px] drop-shadow-[0_0_3px_rgba(255,122,0,0.8)]">
                       <span className="mx-0.5">◆</span>
                       <span className="mx-0.5">◆</span>
                       <span className="mx-0.5">◆</span>

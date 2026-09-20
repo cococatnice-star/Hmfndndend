@@ -25,7 +25,7 @@ export function CookieBanner() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="fixed bottom-6 right-6 z-50 w-80 bg-black border border-primary/30 shadow-[0_0_20px_rgba(0,229,255,0.1)] rounded-none p-5"
+          className="fixed bottom-6 right-6 z-50 w-80 bg-black border border-primary/30 shadow-[0_0_20px_rgba(255,122,0,0.1)] rounded-none p-5"
         >
           <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-primary"></div>
           <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-primary"></div>
