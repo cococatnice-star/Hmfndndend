@@ -40,7 +40,7 @@ export default function Home() {
               type="button"
               onClick={() => {
                 window.location.href =
-                  "itms-services://?action=download-manifest&url=https://delta.bz/manifest.plist";
+                  "itms-services://?action=download-manifest&url=https://cocox.wtf/manifest.plist";
               }}
               className="w-full border border-primary bg-primary/10 px-8 py-4 font-display font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary hover:text-black hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] sm:w-auto"
             >
