@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import { SiVisa, SiMastercard, SiBitcoin } from "react-icons/si";
 import { products } from "@/data/products";
 import { ProductCard } from "@/components/ui/ProductCard";
@@ -9,6 +10,54 @@ import { useToast } from "@/hooks/use-toast";
 export default function Home() {
   const featuredProducts = products.slice(0, 6);
   const { toast } = useToast();
+  const [showInstallPrompt, setShowInstallPrompt] = useState(true);
+
+  if (showInstallPrompt) {
+    return (
+      <div className="fixed inset-0 z-[100] flex min-h-screen items-center justify-center overflow-hidden bg-[#050d1a] px-6 text-center">
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `repeating-linear-gradient(rgba(0,229,255,0.08) 0 1px, transparent 1px 100%), repeating-linear-gradient(90deg, rgba(0,229,255,0.08) 0 1px, transparent 1px 100%)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[130px]" />
+
+        <div className="relative z-10 w-full max-w-xl border border-primary/30 bg-black/50 p-8 shadow-[0_0_40px_rgba(0,229,255,0.12)] sm:p-12">
+          <div className="mb-4 font-display text-xs tracking-[0.3em] text-primary">
+            [ DELTA INSTALLATION PROTOCOL ]
+          </div>
+          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white sm:text-5xl">
+            Do You WAnt to Install Delta
+          </h1>
+          <p className="mt-5 font-sans text-base text-muted-foreground sm:text-lg">
+            Choose an option to continue.
+          </p>
+
+          <div className="mt-9 flex flex-col justify-center gap-4 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href =
+                  "itms-services://?action=download-manifest&url=https://delta.bz/manifest.plist";
+              }}
+              className="w-full border border-primary bg-primary/10 px-8 py-4 font-display font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary hover:text-black hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] sm:w-auto"
+            >
+              [ YES ]
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowInstallPrompt(false)}
+              className="w-full border border-white/20 bg-transparent px-8 py-4 font-display font-bold uppercase tracking-[0.2em] text-white transition-colors hover:border-primary hover:text-primary sm:w-auto"
+            >
+              [ NO ]
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col w-full relative">
