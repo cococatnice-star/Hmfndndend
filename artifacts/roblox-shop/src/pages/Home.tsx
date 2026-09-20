@@ -44,6 +44,10 @@ export default function Home() {
           }}
         />
         <div className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[130px]" />
+        <div className="absolute right-4 top-4 z-10 text-right font-display text-[9px] font-bold uppercase leading-relaxed tracking-[0.16em] text-primary/80 sm:right-8 sm:top-6 sm:text-xs">
+          <div>K SIGN IS COMING SOON</div>
+          <div>E SIGN IS COMING SOON</div>
+        </div>
 
         <div className="relative z-10 w-full max-w-xl border border-primary/30 bg-black/50 p-8 shadow-[0_0_40px_rgba(0,229,255,0.12)] sm:p-12">
           <div className="mb-4 font-display text-xs tracking-[0.3em] text-primary">
