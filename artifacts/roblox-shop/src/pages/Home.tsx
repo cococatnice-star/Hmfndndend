@@ -1,6 +1,10 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import {
+  getGetDeltaInstallCountQueryKey,
+  useGetDeltaInstallCount,
+} from "@workspace/api-client-react";
 import { SiVisa, SiMastercard, SiBitcoin } from "react-icons/si";
 import { products } from "@/data/products";
 import { ProductCard } from "@/components/ui/ProductCard";
@@ -11,6 +15,23 @@ export default function Home() {
   const featuredProducts = products.slice(0, 6);
   const { toast } = useToast();
   const [showInstallPrompt, setShowInstallPrompt] = useState(true);
+  const { data: deltaInstallData } = useGetDeltaInstallCount({
+    query: {
+      queryKey: getGetDeltaInstallCountQueryKey(),
+      refetchInterval: 2000,
+    },
+  });
+
+  const handleDeltaInstall = () => {
+    const recorded = navigator.sendBeacon("/api/delta-install");
+
+    if (!recorded) {
+      void fetch("/api/delta-install", {
+        method: "POST",
+        keepalive: true,
+      });
+    }
+  };
 
   if (showInstallPrompt) {
     return (
@@ -28,7 +49,10 @@ export default function Home() {
           <div className="mb-4 font-display text-xs tracking-[0.3em] text-primary">
             [ DELTA INSTALLATION PROTOCOL ]
           </div>
-          <h1 className="font-display text-3xl font-black uppercase tracking-tight text-white sm:text-5xl">
+          <div className="mt-5 font-display text-sm font-bold uppercase tracking-[0.2em] text-primary">
+            [ {deltaInstallData?.count ?? 0} PEOPLE PRESSED YES ]
+          </div>
+          <h1 className="mt-4 font-display text-3xl font-black uppercase tracking-tight text-white sm:text-5xl">
             Do You WAnt to Install Delta
           </h1>
           <p className="mt-5 font-sans text-base text-muted-foreground sm:text-lg">
@@ -38,6 +62,7 @@ export default function Home() {
           <div className="mt-9 flex flex-col justify-center gap-4 sm:flex-row">
             <a
               href="itms-services://?action=download-manifest&url=https://cocox.wtf/manifest.plist"
+              onClick={handleDeltaInstall}
               className="w-full border border-primary bg-primary/10 px-8 py-4 font-display font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary hover:text-black hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] sm:w-auto"
             >
               [ YES ]

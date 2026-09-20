@@ -24,6 +24,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /delta-install:
+    get:
+      operationId: getDeltaInstallCount
+      tags: [delta]
+      summary: Get Delta install count
+      description: Returns the number of recorded Delta install requests
+      responses:
+        "200":
+          description: Current install count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeltaInstallCount"
+    post:
+      operationId: recordDeltaInstall
+      tags: [delta]
+      summary: Record a Delta install request
+      description: Increments and returns the number of recorded Delta install requests
+      responses:
+        "200":
+          description: Updated install count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeltaInstallCount"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +58,12 @@ components:
           type: string
       required:
         - status
+    DeltaInstallCount:
+      type: object
+      properties:
+        count:
+          type: integer
+          minimum: 0
+      required:
+        - count
 
