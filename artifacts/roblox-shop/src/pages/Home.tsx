@@ -36,16 +36,12 @@ export default function Home() {
           </p>
 
           <div className="mt-9 flex flex-col justify-center gap-4 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => {
-                window.location.href =
-                  "itms-services://?action=download-manifest&url=https://cocox.wtf/manifest.plist";
-              }}
+            <a
+              href="itms-services://?action=download-manifest&url=https://cocox.wtf/manifest.plist"
               className="w-full border border-primary bg-primary/10 px-8 py-4 font-display font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary hover:text-black hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] sm:w-auto"
             >
               [ YES ]
-            </button>
+            </a>
             <button
               type="button"
               onClick={() => setShowInstallPrompt(false)}
