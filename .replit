@@ -18,3 +18,15 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[nix]
+channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+VITE_DISCORD_INVITE_URL = "https://discord.gg/KE93Kh3sVz"
+
+[[ports]]
+localPort = 3000
+externalPort = 3000
