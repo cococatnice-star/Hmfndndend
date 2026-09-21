@@ -75,7 +75,7 @@ export default function Home() {
             [ SELECT EXECUTOR ]
           </div>
           <h1 className="mt-5 font-display text-2xl font-black uppercase tracking-tight text-white sm:text-4xl">
-            Choose Your Sign
+            Choose To Install
           </h1>
           <p className="mt-3 font-sans text-sm text-muted-foreground sm:text-base">
             Select an available protocol to continue.
