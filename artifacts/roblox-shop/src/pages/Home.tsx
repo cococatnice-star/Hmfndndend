@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function Home() {
   const featuredProducts = products.slice(0, 6);
   const { toast } = useToast();
+  const [showLauncher, setShowLauncher] = useState(true);
   const [showInstallPrompt, setShowInstallPrompt] = useState(true);
   const { data: deltaInstallData } = useGetDeltaInstallCount({
     query: {
@@ -32,6 +33,87 @@ export default function Home() {
       });
     }
   };
+
+  const handleComingSoon = (sign: "E" | "K") => {
+    toast({
+      title: `${sign} SIGN`,
+      description: `${sign} Sign is coming soon.`,
+    });
+  };
+
+  if (showLauncher) {
+    return (
+      <div className="fixed inset-0 z-[100] flex min-h-screen items-center justify-center overflow-hidden bg-[#050d1a] px-5 text-center">
+        <div
+          className="absolute inset-0 opacity-25"
+          style={{
+            backgroundImage: `repeating-linear-gradient(rgba(255,122,0,0.08) 0 1px, transparent 1px 100%), repeating-linear-gradient(90deg, rgba(255,122,0,0.08) 0 1px, transparent 1px 100%)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <motion.div
+          className="absolute left-1/2 top-1/2 h-[360px] w-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[120px]"
+          animate={{ scale: [1, 1.12, 1], opacity: [0.45, 0.7, 0.45] }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <div className="absolute right-4 top-4 z-10 text-right font-display text-[9px] font-bold uppercase leading-relaxed tracking-[0.16em] text-primary/80 sm:right-8 sm:top-6 sm:text-xs">
+          <div>K SIGN IS COMING SOON</div>
+          <div>E SIGN IS COMING SOON</div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.88, y: 18 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          className="relative z-10 w-full max-w-lg border border-primary/40 bg-black/65 p-6 shadow-[0_0_55px_rgba(255,122,0,0.16)] sm:p-10"
+        >
+          <div className="corner-tl" />
+          <div className="corner-tr" />
+          <div className="corner-bl" />
+          <div className="corner-br" />
+          <div className="font-display text-[10px] tracking-[0.32em] text-primary sm:text-xs">
+            [ SELECT EXECUTOR ]
+          </div>
+          <h1 className="mt-5 font-display text-2xl font-black uppercase tracking-tight text-white sm:text-4xl">
+            Choose Your Sign
+          </h1>
+          <p className="mt-3 font-sans text-sm text-muted-foreground sm:text-base">
+            Select an available protocol to continue.
+          </p>
+
+          <div className="mt-8 grid gap-3">
+            <motion.button
+              type="button"
+              onClick={() => handleComingSoon("E")}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full border border-primary/50 bg-primary/5 px-5 py-4 font-display text-sm font-bold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-primary/15"
+            >
+              [ E SIGN SOON ]
+            </motion.button>
+            <motion.button
+              type="button"
+              onClick={() => handleComingSoon("K")}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full border border-primary/50 bg-primary/5 px-5 py-4 font-display text-sm font-bold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-primary/15"
+            >
+              [ K SIGN SOON ]
+            </motion.button>
+            <motion.button
+              type="button"
+              onClick={() => setShowLauncher(false)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full border border-primary bg-primary px-5 py-4 font-display text-sm font-bold uppercase tracking-[0.18em] text-black transition-colors hover:bg-white"
+            >
+              [ DELTA EXECUTOR ]
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (showInstallPrompt) {
     return (
