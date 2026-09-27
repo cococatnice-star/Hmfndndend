@@ -11,11 +11,27 @@ import { ProductCard } from "@/components/ui/ProductCard";
 import { ShieldCheck, Zap, Clock, HeadphonesIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+const predictionColors = [
+  { label: "RED", value: "#ef4444" },
+  { label: "BLUE", value: "#3b82f6" },
+  { label: "GREEN", value: "#22c55e" },
+  { label: "PURPLE", value: "#a855f7" },
+  { label: "YELLOW", value: "#eab308" },
+  { label: "ORANGE", value: "#f97316" },
+];
+
 export default function Home() {
   const featuredProducts = products.slice(0, 6);
   const { toast } = useToast();
   const [showLauncher, setShowLauncher] = useState(true);
+  const [showColorPredictor, setShowColorPredictor] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(true);
+  const [observedColors, setObservedColors] = useState<string[]>([
+    "",
+    "",
+    "",
+  ]);
+  const [predictedColors, setPredictedColors] = useState<string[]>([]);
   const { data: deltaInstallData } = useGetDeltaInstallCount({
     query: {
       queryKey: getGetDeltaInstallCountQueryKey(),
@@ -41,6 +57,178 @@ export default function Home() {
     });
   };
 
+  const handlePredictColors = () => {
+    const patternScore = observedColors.reduce((score, color, index) => {
+      const colorIndex = predictionColors.findIndex(
+        (option) => option.value === color,
+      );
+      return score + Math.max(colorIndex, 0) * (index + 1);
+    }, 0);
+
+    setPredictedColors(
+      Array.from({ length: 4 }, (_, index) => {
+        const nextIndex =
+          (patternScore + index * 2 + observedColors.length) %
+          predictionColors.length;
+        return predictionColors[nextIndex].value;
+      }),
+    );
+  };
+
+  const updateObservedColor = (index: number, value: string) => {
+    setObservedColors((current) =>
+      current.map((color, colorIndex) =>
+        colorIndex === index ? value : color,
+      ),
+    );
+    setPredictedColors([]);
+  };
+
+  if (showColorPredictor) {
+    return (
+      <div className="fixed inset-0 z-[100] flex min-h-screen items-center justify-center overflow-y-auto bg-[#050d1a] px-5 py-10 text-center">
+        <div
+          className="absolute inset-0 opacity-25"
+          style={{
+            backgroundImage: `repeating-linear-gradient(rgba(255,122,0,0.08) 0 1px, transparent 1px 100%), repeating-linear-gradient(90deg, rgba(255,122,0,0.08) 0 1px, transparent 1px 100%)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <motion.div
+          className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[130px]"
+          animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.75, 0.4] }}
+          transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.button
+          type="button"
+          onClick={() => {
+            setShowColorPredictor(false);
+            setShowLauncher(true);
+          }}
+          initial={{ opacity: 0, x: -12 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="absolute left-4 top-4 z-20 border border-primary/40 bg-black/50 px-3 py-2 font-display text-[10px] font-bold uppercase tracking-[0.16em] text-primary transition-colors hover:bg-primary hover:text-black sm:left-8 sm:top-6"
+        >
+          [ BACK TO INSTALL ]
+        </motion.button>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 22 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          className="relative z-10 w-full max-w-2xl border border-primary/40 bg-black/70 p-6 shadow-[0_0_55px_rgba(255,122,0,0.16)] sm:p-10"
+        >
+          <div className="corner-tl" />
+          <div className="corner-tr" />
+          <div className="corner-bl" />
+          <div className="corner-br" />
+          <div className="font-display text-[10px] tracking-[0.32em] text-primary sm:text-xs">
+            [ COLOR PATTERN SCANNER ]
+          </div>
+          <h1 className="mt-5 font-display text-2xl font-black uppercase tracking-tight text-white sm:text-4xl">
+            Predict A Color
+          </h1>
+          <p className="mx-auto mt-3 max-w-lg font-sans text-sm text-muted-foreground sm:text-base">
+            Enter the other person&apos;s four colors, then scan the pattern to
+            predict the next four.
+          </p>
+
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {observedColors.map((color, index) => (
+              <motion.label
+                key={index}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.08, duration: 0.35 }}
+                className="group flex cursor-pointer flex-col items-center gap-3 border border-white/10 bg-white/[0.03] p-3 transition-colors hover:border-primary/50"
+              >
+                <span className="font-display text-[10px] font-bold tracking-[0.18em] text-primary/80">
+                  INPUT {index + 1}
+                </span>
+                <span
+                  className="h-16 w-16 rounded-sm border border-white/20 transition-all duration-300 group-hover:scale-105"
+                  style={{
+                    backgroundColor: color || "#111827",
+                    boxShadow: color ? `0 0 24px ${color}88` : "none",
+                  }}
+                />
+                <select
+                  aria-label={`Observed color ${index + 1}`}
+                  value={color}
+                  onChange={(event) =>
+                    updateObservedColor(index, event.target.value)
+                  }
+                  className="w-full cursor-pointer border border-primary/30 bg-[#050d1a] px-2 py-2 text-center font-display text-[10px] font-bold tracking-widest text-white outline-none focus:border-primary"
+                >
+                  <option value="">SELECT</option>
+                  {predictionColors.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </motion.label>
+            ))}
+          </div>
+
+          <motion.button
+            type="button"
+            onClick={handlePredictColors}
+            disabled={observedColors.some((color) => !color)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="mt-7 w-full border border-primary bg-primary px-5 py-4 font-display text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:bg-white disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/30"
+          >
+            [ PREDICT NEXT 4 COLORS ]
+          </motion.button>
+
+          {predictedColors.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mt-8 overflow-hidden border-t border-primary/20 pt-6"
+            >
+              <div className="font-display text-[10px] font-bold tracking-[0.24em] text-primary">
+                [ NEXT 4 COLOR PREDICTIONS ]
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {predictedColors.map((color, index) => (
+                  <motion.div
+                    key={`${color}-${index}`}
+                    initial={{ opacity: 0, scale: 0.5, rotate: -8 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    transition={{
+                      delay: index * 0.16,
+                      type: "spring",
+                      stiffness: 180,
+                      damping: 12,
+                    }}
+                    className="flex flex-col items-center gap-3 border border-primary/30 bg-primary/5 p-3"
+                  >
+                    <span className="font-display text-[10px] font-bold tracking-[0.18em] text-white/70">
+                      NEXT {index + 1}
+                    </span>
+                    <span
+                      className="h-16 w-16 rounded-full border-2 border-white/30"
+                      style={{
+                        backgroundColor: color,
+                        boxShadow: `0 0 30px ${color}aa`,
+                      }}
+                    />
+                    <span className="font-display text-[10px] font-bold tracking-widest text-primary">
+                      {predictionColors.find((option) => option.value === color)
+                        ?.label ?? "UNKNOWN"}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+      </div>
+    );
+  }
+
   if (showLauncher) {
     return (
       <div className="fixed inset-0 z-[100] flex min-h-screen items-center justify-center overflow-hidden bg-[#050d1a] px-5 text-center">
@@ -60,6 +248,20 @@ export default function Home() {
           <div>K SIGN IS COMING SOON</div>
           <div>E SIGN IS COMING SOON</div>
         </div>
+        <motion.button
+          type="button"
+          onClick={() => {
+            setShowLauncher(false);
+            setShowColorPredictor(true);
+          }}
+          initial={{ opacity: 0, x: -12 }}
+          animate={{ opacity: 1, x: 0 }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          className="absolute left-4 top-4 z-20 border border-primary/40 bg-black/50 px-3 py-2 font-display text-[10px] font-bold uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary hover:text-black sm:left-8 sm:top-6"
+        >
+          [ SKIP ] GO TO PREDICT A COLOR
+        </motion.button>
 
         <motion.div
           initial={{ opacity: 0, scale: 0.88, y: 18 }}
