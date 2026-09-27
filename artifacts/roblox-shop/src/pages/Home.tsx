@@ -20,13 +20,16 @@ const predictionColors = [
   { label: "ORANGE", value: "#f97316" },
 ];
 
+type ObservedColors = [string, string, string, string];
+
 export default function Home() {
   const featuredProducts = products.slice(0, 6);
   const { toast } = useToast();
   const [showLauncher, setShowLauncher] = useState(true);
   const [showColorPredictor, setShowColorPredictor] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(true);
-  const [observedColors, setObservedColors] = useState<string[]>([
+  const [observedColors, setObservedColors] = useState<ObservedColors>([
+    "",
     "",
     "",
     "",
@@ -57,7 +60,37 @@ export default function Home() {
     });
   };
 
+  const playDecisionSound = (frequency: number) => {
+    try {
+      const context = new AudioContext();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+      gain.gain.setValueAtTime(0.0001, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(
+        0.08,
+        context.currentTime + 0.01,
+      );
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        context.currentTime + 0.12,
+      );
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start();
+      oscillator.stop(context.currentTime + 0.12);
+      oscillator.addEventListener("ended", () => {
+        void context.close();
+      });
+    } catch {
+      // Browsers can block audio without affecting color selection.
+    }
+  };
+
   const handlePredictColors = () => {
+    playDecisionSound(720);
     const patternScore = observedColors.reduce((score, color, index) => {
       const colorIndex = predictionColors.findIndex(
         (option) => option.value === color,
@@ -76,12 +109,15 @@ export default function Home() {
   };
 
   const updateObservedColor = (index: number, value: string) => {
-    setObservedColors((current) =>
-      current.map((color, colorIndex) =>
-        colorIndex === index ? value : color,
-      ),
-    );
+    if (index < 0 || index > 3) return;
+
+    setObservedColors((current) => {
+      const next = [...current] as ObservedColors;
+      next[index] = value;
+      return next;
+    });
     setPredictedColors([]);
+    playDecisionSound(360 + index * 70);
   };
 
   if (showColorPredictor) {
