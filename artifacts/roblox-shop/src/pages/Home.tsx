@@ -147,12 +147,12 @@ export default function Home() {
               const color = observedColors[index] ?? "";
 
               return (
-                <motion.label
+                <motion.div
                   key={`input-${index + 1}`}
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.08, duration: 0.35 }}
-                  className="group flex min-h-[194px] cursor-pointer flex-col items-center justify-between gap-3 border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-4 text-left transition-all hover:-translate-y-1 hover:border-primary/60 hover:shadow-[0_0_22px_rgba(255,122,0,0.12)]"
+                  className="group flex min-h-[210px] flex-col items-center justify-between gap-3 border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-4 text-left transition-all hover:-translate-y-1 hover:border-primary/60 hover:shadow-[0_0_22px_rgba(255,122,0,0.12)]"
                 >
                   <div className="flex w-full items-center justify-between">
                     <span className="font-display text-[10px] font-bold tracking-[0.18em] text-primary">
@@ -171,22 +171,44 @@ export default function Home() {
                         : "inset 0 0 18px rgba(255,255,255,0.06)",
                     }}
                   />
-                  <select
+                  <div
                     aria-label={`Observed color ${index + 1}`}
-                    value={color}
-                    onChange={(event) =>
-                      updateObservedColor(index, event.target.value)
-                    }
-                    className="w-full cursor-pointer border border-primary/30 bg-[#050d1a] px-2 py-2.5 text-center font-display text-[10px] font-bold tracking-widest text-white outline-none transition-colors focus:border-primary"
+                    className="grid w-full grid-cols-3 gap-1.5"
                   >
-                    <option value="">SELECT COLOR</option>
-                    {predictionColors.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </motion.label>
+                    {predictionColors.map((option) => {
+                      const selected = color === option.value;
+
+                      return (
+                        <motion.button
+                          key={option.value}
+                          type="button"
+                          title={option.label}
+                          aria-label={`Set color ${index + 1} to ${option.label}`}
+                          onClick={() =>
+                            updateObservedColor(index, option.value)
+                          }
+                          whileHover={{ scale: 1.08 }}
+                          whileTap={{ scale: 0.92 }}
+                          className={`h-7 rounded-sm border transition-all ${
+                            selected
+                              ? "border-white ring-1 ring-primary ring-offset-1 ring-offset-[#050d1a]"
+                              : "border-white/10 hover:border-white/70"
+                          }`}
+                          style={{
+                            backgroundColor: option.value,
+                            boxShadow: selected
+                              ? `0 0 12px ${option.value}aa`
+                              : "none",
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                  <span className="font-display text-[9px] font-bold tracking-[0.16em] text-white/50">
+                    {predictionColors.find((option) => option.value === color)
+                      ?.label ?? "CHOOSE COLOR"}
+                  </span>
+                </motion.div>
               );
             })}
           </div>
