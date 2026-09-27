@@ -133,42 +133,62 @@ export default function Home() {
             predict the next four.
           </p>
 
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {observedColors.map((color, index) => (
-              <motion.label
-                key={index}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.08, duration: 0.35 }}
-                className="group flex cursor-pointer flex-col items-center gap-3 border border-white/10 bg-white/[0.03] p-3 transition-colors hover:border-primary/50"
-              >
-                <span className="font-display text-[10px] font-bold tracking-[0.18em] text-primary/80">
-                  INPUT {index + 1}
-                </span>
-                <span
-                  className="h-16 w-16 rounded-sm border border-white/20 transition-all duration-300 group-hover:scale-105"
-                  style={{
-                    backgroundColor: color || "#111827",
-                    boxShadow: color ? `0 0 24px ${color}88` : "none",
-                  }}
-                />
-                <select
-                  aria-label={`Observed color ${index + 1}`}
-                  value={color}
-                  onChange={(event) =>
-                    updateObservedColor(index, event.target.value)
-                  }
-                  className="w-full cursor-pointer border border-primary/30 bg-[#050d1a] px-2 py-2 text-center font-display text-[10px] font-bold tracking-widest text-white outline-none focus:border-primary"
+          <div className="mt-8 flex items-center justify-between border-b border-primary/20 pb-3 text-left">
+            <span className="font-display text-[10px] font-bold tracking-[0.2em] text-primary">
+              OBSERVED SEQUENCE
+            </span>
+            <span className="font-display text-[10px] font-bold tracking-[0.16em] text-white/50">
+              4 INPUTS REQUIRED
+            </span>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }, (_, index) => {
+              const color = observedColors[index] ?? "";
+
+              return (
+                <motion.label
+                  key={`input-${index + 1}`}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.08, duration: 0.35 }}
+                  className="group flex min-h-[194px] cursor-pointer flex-col items-center justify-between gap-3 border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-4 text-left transition-all hover:-translate-y-1 hover:border-primary/60 hover:shadow-[0_0_22px_rgba(255,122,0,0.12)]"
                 >
-                  <option value="">SELECT</option>
-                  {predictionColors.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </motion.label>
-            ))}
+                  <div className="flex w-full items-center justify-between">
+                    <span className="font-display text-[10px] font-bold tracking-[0.18em] text-primary">
+                      COLOR {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="font-display text-[9px] tracking-widest text-white/30">
+                      0{index + 1}/04
+                    </span>
+                  </div>
+                  <span
+                    className="h-20 w-20 rounded-full border-2 border-white/20 transition-all duration-500 group-hover:scale-110"
+                    style={{
+                      backgroundColor: color || "#111827",
+                      boxShadow: color
+                        ? `0 0 28px ${color}99`
+                        : "inset 0 0 18px rgba(255,255,255,0.06)",
+                    }}
+                  />
+                  <select
+                    aria-label={`Observed color ${index + 1}`}
+                    value={color}
+                    onChange={(event) =>
+                      updateObservedColor(index, event.target.value)
+                    }
+                    className="w-full cursor-pointer border border-primary/30 bg-[#050d1a] px-2 py-2.5 text-center font-display text-[10px] font-bold tracking-widest text-white outline-none transition-colors focus:border-primary"
+                  >
+                    <option value="">SELECT COLOR</option>
+                    {predictionColors.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </motion.label>
+              );
+            })}
           </div>
 
           <motion.button
