@@ -35,6 +35,7 @@ export default function Home() {
     "",
   ]);
   const [predictedColors, setPredictedColors] = useState<string[]>([]);
+  const [predictionMode, setPredictionMode] = useState<"one" | "four">("four");
   const { data: deltaInstallData } = useGetDeltaInstallCount({
     query: {
       queryKey: getGetDeltaInstallCountQueryKey(),
@@ -89,8 +90,7 @@ export default function Home() {
     }
   };
 
-  const handlePredictColors = () => {
-    playDecisionSound(720);
+  const getPredictedColors = (count: number) => {
     const patternScore = observedColors.reduce((score, color, index) => {
       const colorIndex = predictionColors.findIndex(
         (option) => option.value === color,
@@ -98,14 +98,24 @@ export default function Home() {
       return score + Math.max(colorIndex, 0) * (index + 1);
     }, 0);
 
-    setPredictedColors(
-      Array.from({ length: 4 }, (_, index) => {
-        const nextIndex =
-          (patternScore + index * 2 + observedColors.length) %
-          predictionColors.length;
-        return predictionColors[nextIndex].value;
-      }),
-    );
+    return Array.from({ length: count }, (_, index) => {
+      const nextIndex =
+        (patternScore + index * 2 + observedColors.length) %
+        predictionColors.length;
+      return predictionColors[nextIndex].value;
+    });
+  };
+
+  const handlePredictColors = () => {
+    playDecisionSound(720);
+    setPredictionMode("four");
+    setPredictedColors(getPredictedColors(4));
+  };
+
+  const handleDiceOne = () => {
+    playDecisionSound(620);
+    setPredictionMode("one");
+    setPredictedColors(getPredictedColors(1));
   };
 
   const updateObservedColor = (index: number, value: string) => {
@@ -249,16 +259,28 @@ export default function Home() {
             })}
           </div>
 
-          <motion.button
-            type="button"
-            onClick={handlePredictColors}
-            disabled={observedColors.some((color) => !color)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="mt-7 w-full border border-primary bg-primary px-5 py-4 font-display text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:bg-white disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/30"
-          >
-            [ PREDICT NEXT 4 COLORS ]
-          </motion.button>
+          <div className="mt-7 grid gap-3 sm:grid-cols-[1fr_auto]">
+            <motion.button
+              type="button"
+              onClick={handlePredictColors}
+              disabled={observedColors.some((color) => !color)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full border border-primary bg-primary px-5 py-4 font-display text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:bg-white disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/30"
+            >
+              [ PREDICT NEXT 4 COLORS ]
+            </motion.button>
+            <motion.button
+              type="button"
+              onClick={handleDiceOne}
+              disabled={observedColors.some((color) => !color)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full border border-primary/60 bg-primary/5 px-5 py-4 font-display text-xs font-bold uppercase tracking-[0.16em] text-primary transition-colors hover:bg-primary hover:text-black disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/5 disabled:text-white/30 sm:w-auto"
+            >
+              [ DICE ONLY ONE ]
+            </motion.button>
+          </div>
 
           {predictedColors.length > 0 && (
             <motion.div
@@ -267,9 +289,17 @@ export default function Home() {
               className="mt-8 overflow-hidden border-t border-primary/20 pt-6"
             >
               <div className="font-display text-[10px] font-bold tracking-[0.24em] text-primary">
-                [ NEXT 4 COLOR PREDICTIONS ]
+                {predictionMode === "one"
+                  ? "[ ONE COLOR DICE RESULT ]"
+                  : "[ NEXT 4 COLOR PREDICTIONS ]"}
               </div>
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div
+                className={
+                  predictionMode === "one"
+                    ? "mt-5 flex justify-center"
+                    : "mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"
+                }
+              >
                 {predictedColors.map((color, index) => (
                   <motion.div
                     key={`${color}-${index}`}
@@ -281,7 +311,9 @@ export default function Home() {
                       stiffness: 180,
                       damping: 12,
                     }}
-                    className="flex flex-col items-center gap-3 border border-primary/30 bg-primary/5 p-3"
+                    className={`flex flex-col items-center gap-3 border border-primary/30 bg-primary/5 p-3 ${
+                      predictionMode === "one" ? "w-full max-w-[220px]" : ""
+                    }`}
                   >
                     <span className="font-display text-[10px] font-bold tracking-[0.18em] text-white/70">
                       NEXT {index + 1}
