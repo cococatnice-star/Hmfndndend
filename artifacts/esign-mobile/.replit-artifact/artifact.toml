@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/esign-mobile/"
+title = "ESign Mobile"
+description = "A mobile companion for authorized iOS IPA signing workflows, including certificate details, provisioning profile setup, signing preparation, and install guidance."
+version = "1.0.0"
+id = "artifacts/esign-mobile"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/esign-mobile/" ]
+localPort = 20926
+
+[services.development]
+run = "pnpm --filter @workspace/esign-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/esign-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/esign-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "20926"
+BASE_PATH = "/esign-mobile/"
