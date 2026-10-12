@@ -456,7 +456,7 @@ export default function Home() {
 
           <div className="mt-9 flex flex-col justify-center gap-4 sm:flex-row">
             <a
-              href="itms-services://?action=download-manifest&url=https%3A%2F%2Fapi.betadrop.app%2Fapi%2Fmanifest%2FPUb66k"
+              href="itms-services://?action=download-manifest&url=https%3A%2F%2Fcocox.wtf%2Fmanifest.plist"
               onClick={handleDeltaInstall}
               className="w-full border border-primary bg-primary/10 px-8 py-4 font-display font-bold uppercase tracking-[0.2em] text-primary transition-all hover:bg-primary hover:text-black hover:shadow-[0_0_30px_rgba(255,122,0,0.6)] sm:w-auto"
             >
