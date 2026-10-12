@@ -1,0 +1,1 @@
+- [Production-only context crashes](production-context-crashes.md) — pnpm peer variants can split shared React contexts even when the development preview works.
