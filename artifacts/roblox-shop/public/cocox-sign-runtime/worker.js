@@ -8,8 +8,13 @@ self.onmessage = async ({ data }) => {
   try {
     const root = new URL("./", self.location.href);
     importScripts(new URL("zsign-mobile.js", root).href);
+    const metadata = {};
     const log = (message) => {
       let line = String(message).replace(/\x1b\[[0-9;]*[mK]/g, "").trim();
+      for (const [label, key] of [["AppName", "title"], ["BundleId", "bundleId"], ["Version", "version"]]) {
+        const match = line.match(new RegExp(`^>>>\\s*${label}:\\s*(.+)$`));
+        if (match && !metadata[key]) metadata[key] = match[1].trim();
+      }
       if (data.password) line = line.split(data.password).join("[redacted]");
       if (line) self.postMessage({ type: "log", line });
     };
@@ -47,7 +52,7 @@ self.onmessage = async ({ data }) => {
     const size = Math.min(node.usedBytes ?? node.contents.byteLength, node.contents.byteLength);
     if (size < 4) throw new Error("The signed output is empty.");
     const bytes = node.contents.subarray(0, size);
-    self.postMessage({ type: "success", bytes }, [bytes.buffer]);
+    self.postMessage({ type: "success", bytes, metadata }, [bytes.buffer]);
   } catch {
     self.postMessage({ type: "error" });
   }

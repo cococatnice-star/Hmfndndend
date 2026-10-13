@@ -5,6 +5,85 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface AuthUser {
+  id: string;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  firstName: string | null;
+  /** @nullable */
+  lastName: string | null;
+  /** @nullable */
+  profileImageUrl: string | null;
+}
+
+export interface AuthUserEnvelope {
+  user: AuthUser | null;
+}
+
+export interface MobileTokenExchangeRequest {
+  /** @minLength 1 */
+  code: string;
+  /** @minLength 1 */
+  code_verifier: string;
+  redirect_uri: string;
+  /** @minLength 1 */
+  state: string;
+  nonce?: string;
+}
+
+export interface MobileTokenExchangeSuccess {
+  token: string;
+}
+
+export const LogoutSuccessValue = {
+  success: true,
+} as const;
+export type LogoutSuccess = typeof LogoutSuccessValue;
+
+export interface CocoXInstallInput {
+  /**
+     * @minLength 5
+     * @maxLength 150
+     * @pattern \.ipa$
+     */
+  name: string;
+  /**
+     * @minimum 4
+     * @maximum 524288000
+     */
+  size: number;
+  /**
+     * @minLength 3
+     * @maxLength 255
+     * @pattern ^[A-Za-z0-9][A-Za-z0-9.-]+$
+     */
+  bundleId: string;
+  /**
+     * @minLength 1
+     * @maxLength 60
+     * @pattern ^[0-9]+(\.[0-9]+)*$
+     */
+  version: string;
+  /**
+     * @minLength 1
+     * @maxLength 150
+     */
+  title: string;
+}
+
+export interface CocoXUpload {
+  id: string;
+  uploadUrl: string;
+  expiresAt: string;
+}
+
+export interface CocoXInstallLink {
+  id: string;
+  installUrl: string;
+  expiresAt: string;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -13,4 +92,8 @@ export interface DeltaInstallCount {
   /** @minimum 0 */
   count: number;
 }
+
+export type BeginBrowserLoginParams = {
+returnTo?: string;
+};
 

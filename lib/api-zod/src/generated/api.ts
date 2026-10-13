@@ -8,6 +8,124 @@
 import * as zod from 'zod';
 
 
+export const GetCurrentAuthUserResponse = zod.object({
+  "user": zod.union([zod.object({
+  "id": zod.string(),
+  "email": zod.string().nullable(),
+  "firstName": zod.string().nullable(),
+  "lastName": zod.string().nullable(),
+  "profileImageUrl": zod.string().nullable()
+}),zod.null()])
+})
+
+
+export const BeginBrowserLoginQueryParams = zod.object({
+  "returnTo": zod.coerce.string().optional()
+})
+
+export const BeginBrowserLoginResponse = zod.void()
+
+
+export const HandleBrowserLoginCallbackResponse = zod.void()
+
+
+export const LogoutBrowserSessionResponse = zod.void()
+
+
+
+
+
+
+
+export const ExchangeMobileAuthorizationCodeBody = zod.object({
+  "code": zod.string().min(1),
+  "code_verifier": zod.string().min(1),
+  "redirect_uri": zod.string().url(),
+  "state": zod.string().min(1),
+  "nonce": zod.string().optional()
+})
+
+export const ExchangeMobileAuthorizationCodeResponse = zod.object({
+  "token": zod.string()
+})
+
+
+export const LogoutMobileSessionResponse = zod.object({
+  "success": zod.literal(true)
+})
+
+
+/**
+ * @summary Request a protected upload URL for a signed IPA
+ */
+export const createCocoXInstallBodyNameMin = 5;
+export const createCocoXInstallBodyNameMax = 150;
+
+
+export const createCocoXInstallBodyNameRegExp = new RegExp('\\.ipa$');
+export const createCocoXInstallBodySizeMin = 4;
+export const createCocoXInstallBodySizeMax = 524288000;
+
+export const createCocoXInstallBodyBundleIdMin = 3;
+export const createCocoXInstallBodyBundleIdMax = 255;
+
+
+export const createCocoXInstallBodyBundleIdRegExp = new RegExp('^[A-Za-z0-9][A-Za-z0-9.-]+$');
+export const createCocoXInstallBodyVersionMax = 60;
+
+
+export const createCocoXInstallBodyVersionRegExp = new RegExp('^[0-9]+(\\.[0-9]+)*$');
+export const createCocoXInstallBodyTitleMax = 150;
+
+
+
+export const CreateCocoXInstallBody = zod.object({
+  "name": zod.string().min(createCocoXInstallBodyNameMin).max(createCocoXInstallBodyNameMax).regex(createCocoXInstallBodyNameRegExp),
+  "size": zod.number().int().min(createCocoXInstallBodySizeMin).max(createCocoXInstallBodySizeMax),
+  "bundleId": zod.string().min(createCocoXInstallBodyBundleIdMin).max(createCocoXInstallBodyBundleIdMax).regex(createCocoXInstallBodyBundleIdRegExp),
+  "version": zod.string().min(1).max(createCocoXInstallBodyVersionMax).regex(createCocoXInstallBodyVersionRegExp),
+  "title": zod.string().min(1).max(createCocoXInstallBodyTitleMax)
+})
+
+export const CreateCocoXInstallResponse = zod.object({
+  "id": zod.string(),
+  "uploadUrl": zod.string().url(),
+  "expiresAt": zod.coerce.date()
+})
+
+
+export const CompleteCocoXInstallParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const CompleteCocoXInstallResponse = zod.object({
+  "id": zod.string(),
+  "installUrl": zod.string(),
+  "expiresAt": zod.coerce.date()
+})
+
+
+export const DeleteCocoXInstallParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const DeleteCocoXInstallResponse = zod.void()
+
+
+export const GetCocoXInstallManifestParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetCocoXInstallManifestResponse = zod.unknown()
+
+
+export const DownloadCocoXInstalledPackageParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const DownloadCocoXInstalledPackageResponse = zod.unknown()
+
+
 /**
  * @summary Download the removable CocoX Sign Home Screen shortcut
  */

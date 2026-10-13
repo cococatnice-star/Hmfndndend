@@ -11,6 +11,7 @@ export interface SigningInputs {
 export interface SignedIpa {
   name: string;
   blob: Blob;
+  metadata?: { bundleId?: string; version?: string; title?: string };
 }
 
 export function useCocoXSigner() {
@@ -57,7 +58,7 @@ export function useCocoXSigner() {
           const line = inputs.password ? String(data.line).split(inputs.password).join("[redacted]") : String(data.line);
           setLogs(previous => [...previous.slice(-79), line]);
         } else if (data.type === "success") {
-          setResult({ name, blob: new Blob([data.bytes], { type: "application/octet-stream" }) });
+          setResult({ name, blob: new Blob([data.bytes], { type: "application/octet-stream" }), metadata: data.metadata });
           setStatus("success");
           instance.terminate();
           worker.current = null;

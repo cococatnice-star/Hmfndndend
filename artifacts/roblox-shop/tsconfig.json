@@ -20,6 +20,9 @@
     },
     {
       "path": "../../lib/store-catalog"
+    },
+    {
+      "path": "../../lib/replit-auth-web"
     }
   ]
 }

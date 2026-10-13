@@ -14,3 +14,9 @@ The primary CocoX Sign button should start Home Screen shortcut installation, wi
 **Why:** The user asked for pressing CocoX Sign to automatically put it on the Home Screen and to “look like e sign but better.”
 
 **How to apply:** Start the shortcut-profile download from the primary entry; keep direct browser access available separately. Explain that iOS still requires Allow and installation approval in Settings rather than claiming a website can silently add an icon.
+
+Signed IPA installation is a separate, optional upload; it does not turn CocoX Sign into a native signing app.
+
+**Why:** The user asked to install the result after signing. iOS installation needs an HTTPS-hosted package and manifest, unlike local signing and downloading. Preserving local private-key handling avoids distributing the public certificate's private key to website visitors.
+
+**How to apply:** Keep local signing and downloading available without login. Require login and clear consent for hosted installation, upload only the signed IPA (including its embedded provisioning profile), and never upload the P12 or password. Warn that login reloads the page and that anyone holding the installation link can download the hosted package until expiry. Keep a manual Install action because browsers can block an automatic install prompt.

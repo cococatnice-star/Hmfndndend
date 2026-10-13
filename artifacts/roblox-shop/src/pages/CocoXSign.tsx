@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -6,7 +6,13 @@ import {
   KeyRound, Loader2, Lock, PenTool, Plus, RotateCcw, Settings, ShieldAlert, Smartphone,
   Trash2, TriangleAlert, X,
 } from "lucide-react";
-import { useCocoXSigner } from "@/hooks/useCocoXSigner";
+import { useCocoXSigner, type SignedIpa } from "@/hooks/useCocoXSigner";
+import { useCocoXInstaller } from "@/hooks/useCocoXInstaller";
+import { useAuth } from "@workspace/replit-auth-web";
+import { InstallPanel, LoginNotice, UPLOAD_DISCLOSURE } from "@/components/cocox-sign/InstallPanel";
+
+const IS_IOS = typeof navigator !== "undefined" &&
+  (/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
 
 const BASE = import.meta.env.BASE_URL;
 const PROFILE_URL = `${BASE}api/cocox-sign-profile`;
@@ -93,6 +99,14 @@ function PickButton({ label, onClick, disabled, testId }: { label: string; onCli
 
 export default function CocoXSign() {
   const { status, error, logs, result, sign, cancel, download } = useCocoXSigner();
+  const installer = useCocoXInstaller();
+  const { isAuthenticated, isLoading: authLoading, login } = useAuth();
+  const [autoInstall, setAutoInstall] = useState(false);
+  const autoAttempted = useRef<SignedIpa | null>(null);
+  const prepareRef = useRef(installer.prepare);
+  prepareRef.current = installer.prepare;
+  const clearInstallRef = useRef(installer.clear);
+  clearInstallRef.current = installer.clear;
   const [tab, setTab] = useState<Tab>("files");
   const [files, setFiles] = useState<Record<Slot, File | null>>({ ipa: null, p12: null, profile: null });
   const [password, setPassword] = useState("");
@@ -105,7 +119,32 @@ export default function CocoXSign() {
   const isMobile = typeof navigator !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   // Any change to signing inputs invalidates a running job or a stale result.
-  const invalidate = () => { if (status !== "idle") cancel(); setFormError(""); };
+  const invalidate = () => {
+    if (status !== "idle") cancel();
+    installer.clear();
+    autoAttempted.current = null;
+    setFormError("");
+  };
+
+  const runPrepare = (target: SignedIpa) => {
+    autoAttempted.current = target;
+    void prepareRef.current(target).then((url) => {
+      if (url && IS_IOS) window.location.href = url;
+    });
+  };
+
+  // Auto-prepare exactly once per real signing result when the user consented.
+  useEffect(() => {
+    if (status !== "success" || !result || !autoInstall || !isAuthenticated) return;
+    if (autoAttempted.current === result) return;
+    runPrepare(result);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, result, autoInstall, isAuthenticated]);
+
+  // If the signer leaves success (cancel/reset/new run), discard install state for the old result.
+  useEffect(() => {
+    if (status !== "success") clearInstallRef.current();
+  }, [status]);
 
   const pick = (slot: Slot) => inputs[slot].current?.click();
   const onFile = (slot: Slot, f: File | undefined) => {
@@ -125,11 +164,19 @@ export default function CocoXSign() {
       setFormError(`Missing: ${missing.map((m) => SLOT_META[m].label.toLowerCase()).join(", ")}. Add ${missing.length > 1 ? "them" : "it"} in ${missing.includes("ipa") ? "Files" : "Certificates"}.`);
       return;
     }
+    if (autoInstall && !isAuthenticated) {
+      setFormError("Log in before signing to prepare iOS installation, or turn off Prepare iOS installation to sign locally.");
+      return;
+    }
     setFormError("");
+    installer.clear();
+    autoAttempted.current = null;
     sign({ ipa: files.ipa!, p12: files.p12!, profile: files.profile!, password, outputName: outputName.trim() || undefined });
   };
   const resetAll = () => {
     cancel();
+    installer.clear();
+    autoAttempted.current = null;
     setFiles({ ipa: null, p12: null, profile: null });
     setPassword(""); setOutputName(""); setFormError("");
   };
@@ -142,7 +189,7 @@ export default function CocoXSign() {
   const shortcutCard = (
     <Group title="Home Screen" footer="Adds only a CocoX Sign shortcut that opens this page. No DNS or network changes, no silent install, not a native app. Remove it anytime in Settings > General > VPN & Device Management.">
       <a href={PROFILE_URL} data-testid="link-mobileconfig" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[#ff6a00]/[0.06]">
-        <img src={`${BASE}cocox-sign-icon.png`} alt="" className="h-9 w-9 rounded-[10px]" />
+        <img src={`${BASE}cocox-sign-icon.png`} alt="" className="h-9 w-9 rounded-[10px] object-cover" />
         <span className="flex-1">
           <span className="block text-[15.5px] font-medium text-[#ff9a4a]">Add to Home Screen</span>
           <span className="block text-[12.5px] text-[#b88a6a]">Downloads the shortcut profile</span>
@@ -171,7 +218,7 @@ export default function CocoXSign() {
         {/* Sidebar: tablet/desktop */}
         <aside className="sticky top-0 hidden h-[100dvh] w-64 shrink-0 flex-col border-r border-[#ff6a00]/10 px-4 py-6 md:flex">
           <div className="flex items-center gap-3 px-2">
-            <img src={`${BASE}cocox-sign-icon.png`} alt="" className="h-11 w-11 rounded-[12px] shadow-[0_8px_24px_rgba(255,106,0,0.35)]" />
+            <img src={`${BASE}cocox-sign-icon.png`} alt="" className="h-11 w-11 rounded-[12px] object-cover shadow-[0_8px_24px_rgba(255,106,0,0.35)]" />
             <div>
               <div className="font-display text-[15px] font-black tracking-wide">COCOX <span className="text-[#ff6a00]">SIGN</span></div>
               <div className="text-[11px] text-[#b88a6a]">Private on-device signer</div>
@@ -197,7 +244,7 @@ export default function CocoXSign() {
           <header className="sticky top-0 z-20 border-b border-[#ff6a00]/10 bg-[#120904]/80 px-5 pb-3 pt-[calc(12px+env(safe-area-inset-top))] backdrop-blur-xl md:px-10 md:pt-8">
             <div className="flex items-center justify-between md:hidden">
               <Link href="/" aria-label="CocoX homepage" className="flex items-center gap-1 text-[15px] text-[#ff9a4a]"><ArrowLeft className="h-4 w-4" /> Home</Link>
-              <span className="font-display text-[11px] font-black tracking-[0.18em]">COCOX <span className="text-[#ff6a00]">SIGN</span></span>
+              <span className="flex items-center gap-2 font-display text-[11px] font-black tracking-[0.18em]"><img src={`${BASE}cocox-sign-icon.png`} alt="" className="h-7 w-7 rounded-[8px] object-cover" />COCOX <span className="text-[#ff6a00]">SIGN</span></span>
             </div>
             <div className="mt-2 flex items-end justify-between gap-3">
               <AnimatePresence mode="wait">
@@ -221,7 +268,7 @@ export default function CocoXSign() {
               <motion.div key={tab} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} transition={{ duration: 0.2, ease: "easeOut" }}>
                 {tab === "files" && (
                   <>
-                    <Group title="Selected app" footer="Files stay in this tab's memory only. Nothing is uploaded; closing the page clears them.">
+                    <Group title="Selected app" footer="Files stay in this tab's memory only. Your P12 and password stay local; the signed IPA is uploaded only if you choose installation. Closing the page clears them.">
                       {files.ipa ? (
                         <Row icon={<FileArchive className="h-5 w-5" />} title={files.ipa.name} sub={fmtSize(files.ipa.size)} testId="text-file-ipa"
                           right={<div className="flex items-center gap-2">
@@ -294,6 +341,16 @@ export default function CocoXSign() {
                         className="w-full bg-transparent px-4 py-3.5 text-[16px] text-[#fff1e4] outline-none placeholder:text-[#6b4a35] disabled:opacity-50" />
                     </Group>
 
+                    <Group title="Installation" footer={UPLOAD_DISCLOSURE}>
+                      <label className="flex cursor-pointer items-center gap-3 px-4 py-3.5">
+                        <input type="checkbox" checked={autoInstall} disabled={signing} data-testid="checkbox-auto-install"
+                          onChange={(e) => { setAutoInstall(e.target.checked); setFormError(""); }}
+                          className="h-5 w-5 accent-[#ff6a00]" />
+                        <span className="flex-1 text-[15.5px]">Prepare iOS installation after signing</span>
+                      </label>
+                    </Group>
+                    {autoInstall && !isAuthenticated && <LoginNotice onLogin={login} loading={authLoading} />}
+
                     {isMobile && status !== "success" && <Alert tone="warn" testId="text-memory-warning">Phones have limited memory. Keep this tab in front; large apps may fail, desktop is more reliable.</Alert>}
 
                     {signing && (
@@ -334,6 +391,16 @@ export default function CocoXSign() {
                     </div>
                     <p className="mt-3 text-[12.5px] text-[#a7826a]">A signed file does not prove Apple trusts the certificate; revoked certificates stop apps from opening.</p>
 
+                    {status === "success" && result && (
+                      <InstallPanel phase={installer.phase} progress={installer.progress} error={installer.error}
+                        installUrl={installer.installUrl} expiresAt={installer.expiresAt} isIOS={IS_IOS}
+                        isAuthenticated={isAuthenticated} authLoading={authLoading}
+                        onPrepare={() => runPrepare(result)}
+                        onCancel={() => installer.clear()}
+                        onRevoke={() => { void installer.revoke(); }}
+                        onLogin={login} onDownload={download} />
+                    )}
+
                     {logs.length > 0 && (
                       <div className="mt-6">
                         <h3 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#b88a6a]">Engine log</h3>
@@ -347,7 +414,7 @@ export default function CocoXSign() {
                   <>
                     {shortcutCard}
                     <Group title="Privacy">
-                      <Row icon={<Lock className="h-5 w-5" />} title="No uploads" sub="Signing runs in a local browser worker" />
+                      <Row icon={<Lock className="h-5 w-5" />} title="Private signing" sub="P12 and password stay local; IPA uploaded only if you choose installation" />
                       <Row icon={<KeyRound className="h-5 w-5" />} title="No secret retention" sub="Password and keys live in memory only" />
                       <Row icon={<Smartphone className="h-5 w-5" />} title="Memory" sub="Large apps sign best on desktop Chrome or Edge" />
                     </Group>
