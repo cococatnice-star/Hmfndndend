@@ -1,274 +1,387 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Link } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowLeft, Check, Download, FileArchive, FileBadge, FileKey, KeyRound,
-  Loader2, Lock, RotateCcw, Smartphone, TriangleAlert, X,
+  ArrowLeft, Check, ChevronRight, Download, FileArchive, FileBadge, FileKey, Folder,
+  KeyRound, Loader2, Lock, PenTool, Plus, RotateCcw, Settings, ShieldAlert, Smartphone,
+  Trash2, TriangleAlert, X,
 } from "lucide-react";
 import { useCocoXSigner } from "@/hooks/useCocoXSigner";
 
 const BASE = import.meta.env.BASE_URL;
+const PROFILE_URL = `${BASE}api/cocox-sign-profile`;
+const NATIVE_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Rajdhani", system-ui, sans-serif';
 
+type Tab = "files" | "certs" | "sign" | "settings";
 type Slot = "ipa" | "p12" | "profile";
 
-const slots: { key: Slot; label: string; hint: string; accept: string; exts: string[]; Icon: typeof FileArchive }[] = [
-  { key: "ipa", label: "App package", hint: ".ipa or .zip", accept: ".ipa,.zip", exts: ["ipa", "zip"], Icon: FileArchive },
-  { key: "p12", label: "Certificate", hint: ".p12 or .pfx", accept: ".p12,.pfx", exts: ["p12", "pfx"], Icon: FileKey },
-  { key: "profile", label: "Provisioning profile", hint: ".mobileprovision", accept: ".mobileprovision", exts: ["mobileprovision"], Icon: FileBadge },
+const TABS: { id: Tab; label: string; Icon: typeof Folder }[] = [
+  { id: "files", label: "Files", Icon: Folder },
+  { id: "certs", label: "Certificates", Icon: KeyRound },
+  { id: "sign", label: "Sign", Icon: PenTool },
+  { id: "settings", label: "Settings", Icon: Settings },
 ];
 
+const SLOT_META: Record<Slot, { label: string; accept: string; exts: string[]; hint: string }> = {
+  ipa: { label: "App package", accept: ".ipa,.zip", exts: ["ipa", "zip"], hint: ".ipa or .zip" },
+  p12: { label: "Certificate", accept: ".p12,.pfx", exts: ["p12", "pfx"], hint: ".p12 or .pfx" },
+  profile: { label: "Provisioning profile", accept: ".mobileprovision", exts: ["mobileprovision"], hint: ".mobileprovision" },
+};
+
 function fmtSize(n: number) {
-  return n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
+  return n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
 }
 
-function FileSlot({ index, slot, file, disabled, onPick }: {
-  index: number; slot: (typeof slots)[number]; file: File | null; disabled: boolean;
-  onPick: (f: File | null, err?: string) => void;
-}) {
-  const ref = useRef<HTMLInputElement>(null);
-  const { Icon } = slot;
+/* ---------- presentational pieces ---------- */
+
+function Group({ title, footer, children }: { title?: string; footer?: ReactNode; children: ReactNode }) {
   return (
-    <motion.button
-      type="button"
-      data-testid={`button-pick-${slot.key}`}
-      disabled={disabled}
-      onClick={() => ref.current?.click()}
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.15 + index * 0.07 }}
-      whileHover={disabled ? undefined : { y: -3 }}
-      whileTap={disabled ? undefined : { scale: 0.98 }}
-      className={`group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border-2 p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
-        file ? "border-[#ff6a00] bg-[#ff6a00]/10" : "border-dashed border-[#ff6a00]/35 bg-[#1a0d05]/60 hover:border-[#ff6a00]/80"
-      }`}
-    >
-      <input
-        ref={ref}
-        type="file"
-        accept={slot.accept}
-        className="hidden"
-        data-testid={`input-${slot.key}`}
-        onChange={(e) => {
-          const f = e.target.files?.[0] ?? null;
-          e.target.value = "";
-          if (!f) return;
-          const ext = f.name.split(".").pop()?.toLowerCase() ?? "";
-          if (!slot.exts.includes(ext)) onPick(null, `${slot.label} must be ${slot.hint}. "${f.name}" was not accepted.`);
-          else onPick(f);
-        }}
-      />
-      <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all ${file ? "bg-[#ff6a00] text-[#1a0a00]" : "bg-[#ff6a00]/15 text-[#ff8a2a] group-hover:rotate-[-6deg]"}`}>
-        <AnimatePresence mode="wait" initial={false}>
-          {file ? (
-            <motion.span key="ok" initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }}><Check className="h-6 w-6" strokeWidth={3} /></motion.span>
-          ) : (
-            <motion.span key="ic" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}><Icon className="h-6 w-6" /></motion.span>
-          )}
-        </AnimatePresence>
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-baseline gap-2">
-          <span className="font-mono text-[10px] text-[#ff8a2a]/70">0{index + 1}</span>
-          <span className="font-display text-xs font-bold uppercase tracking-[0.14em] text-[#fff1e4]">{slot.label}</span>
-        </span>
-        <span className="mt-1 block truncate text-sm text-[#e8c8ad]/75" data-testid={`text-file-${slot.key}`}>
-          {file ? `${file.name}  ·  ${fmtSize(file.size)}` : `Tap to choose ${slot.hint}`}
-        </span>
-      </span>
-      <span className="font-display text-[10px] font-bold uppercase tracking-widest text-[#ff8a2a]">{file ? "Change" : "Choose"}</span>
-    </motion.button>
+    <section className="mb-6">
+      {title && <h3 className="mb-2 px-4 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#b88a6a]">{title}</h3>}
+      <div className="overflow-hidden rounded-[18px] border border-[#ff6a00]/15 bg-[#22130a] shadow-[0_1px_0_rgba(255,180,120,0.06)_inset]">
+        {children}
+      </div>
+      {footer && <p className="mt-2 px-4 text-[12.5px] leading-snug text-[#a7826a]">{footer}</p>}
+    </section>
   );
 }
 
+function Row({ icon, tint = "#ff6a00", title, sub, right, onClick, testId, danger }: {
+  icon: ReactNode; tint?: string; title: ReactNode; sub?: ReactNode; right?: ReactNode;
+  onClick?: () => void; testId?: string; danger?: boolean;
+}) {
+  const inner = (
+    <>
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-[#1a0a00]" style={{ background: tint }}>{icon}</span>
+      <span className="min-w-0 flex-1 text-left">
+        <span className={`block truncate text-[15.5px] font-medium ${danger ? "text-[#ff6b52]" : "text-[#fff1e4]"}`}>{title}</span>
+        {sub && <span className="block truncate text-[12.5px] text-[#b88a6a]">{sub}</span>}
+      </span>
+      {right}
+    </>
+  );
+  const cls = "flex w-full items-center gap-3 px-4 py-3 border-b border-[#ff6a00]/10 last:border-b-0";
+  return onClick ? (
+    <button type="button" onClick={onClick} data-testid={testId} className={`${cls} transition-colors hover:bg-[#ff6a00]/[0.06] active:bg-[#ff6a00]/[0.12]`}>{inner}</button>
+  ) : (
+    <div className={cls} data-testid={testId}>{inner}</div>
+  );
+}
+
+function Alert({ children, tone = "error", testId }: { children: ReactNode; tone?: "error" | "warn"; testId?: string }) {
+  const err = tone === "error";
+  return (
+    <motion.div role={err ? "alert" : "note"} data-testid={testId}
+      initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+      className={`mb-4 flex gap-2.5 rounded-[14px] border p-3 text-[13.5px] leading-snug ${err ? "border-[#ff3b1f]/40 bg-[#ff3b1f]/12 text-[#ffd0c4]" : "border-[#ffb27a]/25 bg-[#ffb27a]/[0.08] text-[#ffdcc0]"}`}>
+      {err ? <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-[#ff5a3c]" /> : <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-[#ffb27a]" />}
+      <span>{children}</span>
+    </motion.div>
+  );
+}
+
+function PickButton({ label, onClick, disabled, testId }: { label: string; onClick: () => void; disabled?: boolean; testId?: string }) {
+  return (
+    <button type="button" onClick={onClick} disabled={disabled} data-testid={testId}
+      className="rounded-full bg-[#ff6a00]/15 px-3 py-1.5 text-[13px] font-semibold text-[#ff9a4a] transition hover:bg-[#ff6a00]/25 active:scale-95 disabled:opacity-40">
+      {label}
+    </button>
+  );
+}
+
+/* ---------- page ---------- */
+
 export default function CocoXSign() {
   const { status, error, logs, result, sign, cancel, download } = useCocoXSigner();
+  const [tab, setTab] = useState<Tab>("files");
   const [files, setFiles] = useState<Record<Slot, File | null>>({ ipa: null, p12: null, profile: null });
   const [password, setPassword] = useState("");
   const [outputName, setOutputName] = useState("");
   const [formError, setFormError] = useState("");
+  const inputs = { ipa: useRef<HTMLInputElement>(null), p12: useRef<HTMLInputElement>(null), profile: useRef<HTMLInputElement>(null) };
+
   const signing = status === "signing";
-  const ready = !!(files.ipa && files.p12 && files.profile);
+  const missing = (Object.keys(files) as Slot[]).filter((k) => !files[k]);
   const isMobile = typeof navigator !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const bigIpa = (files.ipa?.size ?? 0) > 150 * 1048576;
+
+  // Any change to signing inputs invalidates a running job or a stale result.
+  const invalidate = () => { if (status !== "idle") cancel(); setFormError(""); };
+
+  const pick = (slot: Slot) => inputs[slot].current?.click();
+  const onFile = (slot: Slot, f: File | undefined) => {
+    if (!f) return;
+    const ext = f.name.split(".").pop()?.toLowerCase() ?? "";
+    if (!SLOT_META[slot].exts.includes(ext)) {
+      setFormError(`${SLOT_META[slot].label} must be ${SLOT_META[slot].hint}. "${f.name}" was not accepted.`);
+      return;
+    }
+    invalidate();
+    setFiles((p) => ({ ...p, [slot]: f }));
+  };
+  const remove = (slot: Slot) => { invalidate(); setFiles((p) => ({ ...p, [slot]: null })); };
 
   const start = () => {
-    const missing = slots.filter((s) => !files[s.key]).map((s) => s.label.toLowerCase());
-    if (missing.length) { setFormError(`Choose your ${missing.join(", ")} before signing.`); return; }
+    if (missing.length) {
+      setFormError(`Missing: ${missing.map((m) => SLOT_META[m].label.toLowerCase()).join(", ")}. Add ${missing.length > 1 ? "them" : "it"} in ${missing.includes("ipa") ? "Files" : "Certificates"}.`);
+      return;
+    }
     setFormError("");
     sign({ ipa: files.ipa!, p12: files.p12!, profile: files.profile!, password, outputName: outputName.trim() || undefined });
   };
-
   const resetAll = () => {
     cancel();
     setFiles({ ipa: null, p12: null, profile: null });
     setPassword(""); setOutputName(""); setFormError("");
   };
 
+  const statusLabel = status === "idle" ? (missing.length ? "Not ready" : "Ready") : status === "signing" ? "Signing" : status === "success" ? "Signed" : "Failed";
+  const statusColor = status === "success" ? "#ffd29a" : status === "error" ? "#ff5a3c" : status === "signing" || !missing.length ? "#ff6a00" : "#6b4a35";
+
+  const titles: Record<Tab, string> = { files: "Files", certs: "Certificates", sign: "Sign", settings: "Settings" };
+
+  const shortcutCard = (
+    <Group title="Home Screen" footer="Adds only a CocoX Sign shortcut that opens this page. No DNS or network changes, no silent install, not a native app. Remove it anytime in Settings > General > VPN & Device Management.">
+      <a href={PROFILE_URL} data-testid="link-mobileconfig" className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[#ff6a00]/[0.06]">
+        <img src={`${BASE}cocox-sign-icon.png`} alt="" className="h-9 w-9 rounded-[10px]" />
+        <span className="flex-1">
+          <span className="block text-[15.5px] font-medium text-[#ff9a4a]">Add to Home Screen</span>
+          <span className="block text-[12.5px] text-[#b88a6a]">Downloads the shortcut profile</span>
+        </span>
+        <Download className="h-4 w-4 text-[#ff9a4a]" />
+      </a>
+      <ol className="space-y-2 border-t border-[#ff6a00]/10 px-4 py-3 text-[13.5px] text-[#e8c8ad]">
+        {["In Safari, tap Add to Home Screen, then Allow.", "Open Settings and tap Profile Downloaded.", "Tap Install, enter your passcode, then Install."].map((s, i) => (
+          <li key={s} className="flex gap-3"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#ff6a00] text-[11px] font-bold text-[#1a0a00]">{i + 1}</span>{s}</li>
+        ))}
+      </ol>
+    </Group>
+  );
+
   return (
-    <div className="relative min-h-[100dvh] overflow-hidden bg-[#140902] font-sans text-[#fff1e4]">
-      <div className="pointer-events-none absolute -left-40 -top-40 h-[520px] w-[520px] rounded-full bg-[#ff5a00]/25 blur-[140px]" />
-      <motion.div className="pointer-events-none absolute -bottom-52 right-[-10%] h-[560px] w-[560px] rounded-full bg-[#ff9a1f]/15 blur-[150px]"
-        animate={{ scale: [1, 1.12, 1] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} />
-      <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "radial-gradient(#ff8a2a 1px, transparent 1px)", backgroundSize: "22px 22px" }} />
+    <div className="min-h-[100dvh] bg-[#120904] text-[#fff1e4] antialiased" style={{ fontFamily: NATIVE_FONT }}>
+      <div className="pointer-events-none fixed -left-32 -top-40 h-[440px] w-[440px] rounded-full bg-[#ff5a00]/20 blur-[140px]" />
+      <div className="pointer-events-none fixed -bottom-40 right-0 h-[380px] w-[380px] rounded-full bg-[#ff9a1f]/10 blur-[140px]" />
 
-      <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-5 sm:px-8">
-        <header className="flex items-center justify-between">
-          <Link href="/" data-testid="link-home" className="inline-flex items-center gap-2 rounded-full border border-[#ff6a00]/40 px-4 py-2 font-display text-[10px] font-bold uppercase tracking-[0.16em] text-[#ffb27a] transition-colors hover:bg-[#ff6a00] hover:text-[#1a0a00]">
-            <ArrowLeft className="h-3.5 w-3.5" /> CocoX home
-          </Link>
-          <span className="inline-flex items-center gap-2 font-mono text-[11px] text-[#ffb27a]/80"><Lock className="h-3.5 w-3.5" /> on-device only</span>
-        </header>
+      {(["ipa", "p12", "profile"] as Slot[]).map((s) => (
+        <input key={s} ref={inputs[s]} type="file" accept={SLOT_META[s].accept} className="hidden" data-testid={`input-${s}`}
+          onChange={(e) => { onFile(s, e.target.files?.[0]); e.target.value = ""; }} />
+      ))}
 
-        <section className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-start">
-          <div className="min-w-0">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
-              <motion.img src={`${BASE}cocox-sign-icon.png`} alt="" className="h-16 w-16 rounded-[18px] shadow-[0_10px_40px_rgba(255,106,0,0.45)]"
-                whileHover={{ rotate: -8, scale: 1.06 }} />
-              <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#ff8a2a]">Private IPA signer</span>
-            </motion.div>
-            <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
-              className="mt-6 font-display font-black uppercase leading-[0.9] tracking-tight" style={{ fontSize: "clamp(2.8rem, 8vw, 5.6rem)" }}>
-              CocoX<br /><span className="text-[#ff6a00]">Sign</span>
-            </motion.h1>
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.18 }} className="mt-5 max-w-md text-lg leading-snug text-[#e8c8ad]">
-              Sign your own iOS app with your own certificate, right inside this browser tab. Nothing is uploaded. Your password and certificate never leave your device and are discarded when you close the page.
-            </motion.p>
-
-            <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.26 }} className="mt-7 space-y-3 text-sm text-[#e8c8ad]/85">
-              <li className="flex gap-3"><Lock className="mt-0.5 h-4 w-4 shrink-0 text-[#ff6a00]" /><span className="min-w-0">No uploads. Signing runs in a local worker; files stay in memory only.</span></li>
-              <li className="flex gap-3"><TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-[#ff6a00]" /><span className="min-w-0">A signed IPA is not proof Apple trusts your certificate. Certificates can be revoked by Apple at any time, after which signed apps stop opening.</span></li>
-              <li className="flex gap-3"><Smartphone className="mt-0.5 h-4 w-4 shrink-0 text-[#ff6a00]" /><span className="min-w-0">Large apps need lots of memory. Phones may stop mid-way; desktop Chrome or Edge is the most reliable.</span></li>
-            </motion.ul>
-
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.34 }}
-              className="mt-9 rounded-3xl border border-[#ff6a00]/30 bg-[#1f0f05]/80 p-5">
-              <div className="font-display text-xs font-bold uppercase tracking-[0.16em] text-[#ffb27a]">Add to Home Screen</div>
-              <p className="mt-2 text-sm text-[#e8c8ad]/80">This profile only installs a CocoX Sign shortcut (webclip) that opens this page. It makes no DNS or network changes and is not a native app.</p>
-              <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-[#e8c8ad]/80">
-                <li>Open this page in Safari and tap the button below, then Allow.</li>
-                <li>Open Settings, tap Profile Downloaded.</li>
-                <li>Tap Install, enter your passcode, then Install again.</li>
-              </ol>
-              <a href={`${BASE}api/cocox-sign-profile`} data-testid="link-mobileconfig"
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#fff1e4] px-5 py-3 font-display text-[11px] font-bold uppercase tracking-[0.14em] text-[#1a0a00] transition-transform hover:-translate-y-0.5 active:scale-95">
-                <Download className="h-4 w-4" /> Get Home Screen shortcut
-              </a>
-            </motion.div>
+      <div className="relative mx-auto flex min-h-[100dvh] max-w-6xl">
+        {/* Sidebar: tablet/desktop */}
+        <aside className="sticky top-0 hidden h-[100dvh] w-64 shrink-0 flex-col border-r border-[#ff6a00]/10 px-4 py-6 md:flex">
+          <div className="flex items-center gap-3 px-2">
+            <img src={`${BASE}cocox-sign-icon.png`} alt="" className="h-11 w-11 rounded-[12px] shadow-[0_8px_24px_rgba(255,106,0,0.35)]" />
+            <div>
+              <div className="font-display text-[15px] font-black tracking-wide">COCOX <span className="text-[#ff6a00]">SIGN</span></div>
+              <div className="text-[11px] text-[#b88a6a]">Private on-device signer</div>
+            </div>
           </div>
+          <nav className="mt-8 space-y-1" role="tablist" aria-label="CocoX Sign sections">
+            {TABS.map(({ id, label, Icon }) => (
+              <button key={id} type="button" role="tab" aria-selected={tab === id} aria-label={`${label} tab`} data-testid={`tab-${id}`}
+                onClick={() => setTab(id)}
+                className={`relative flex w-full items-center gap-3 rounded-[12px] px-3 py-2.5 text-[15px] font-medium transition-colors ${tab === id ? "text-[#1a0a00]" : "text-[#e8c8ad] hover:bg-[#ff6a00]/[0.07]"}`}>
+                {tab === id && <motion.span layoutId="side-pill" className="absolute inset-0 rounded-[12px] bg-[#ff6a00]" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+                <Icon className="relative h-[18px] w-[18px]" /><span className="relative">{label}</span>
+              </button>
+            ))}
+          </nav>
+          <Link href="/" data-testid="link-home" className="mt-auto flex items-center gap-2 rounded-[12px] px-3 py-2.5 text-[14px] text-[#b88a6a] transition-colors hover:text-[#ff9a4a]">
+            <ArrowLeft className="h-4 w-4" /> CocoX homepage
+          </Link>
+        </aside>
 
-          <motion.div initial={{ opacity: 0, y: 30, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: 0.1, type: "spring", stiffness: 120, damping: 18 }}
-            className="min-w-0 rounded-[28px] border border-[#ff6a00]/40 bg-[#1a0c04]/90 p-5 shadow-[0_30px_80px_-20px_rgba(255,90,0,0.35)] backdrop-blur sm:p-7">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-sm font-bold uppercase tracking-[0.18em]">Signing bench</h2>
-              <span data-testid="status-signer" className={`rounded-full px-3 py-1 font-mono text-[10px] uppercase ${
-                status === "success" ? "bg-[#ffd29a] text-[#1a0a00]" : status === "error" ? "bg-[#ff3b1f] text-white" : status === "signing" ? "bg-[#ff6a00] text-[#1a0a00]" : "bg-[#ff6a00]/15 text-[#ffb27a]"}`}>
-                {status === "idle" ? (ready ? "ready" : "waiting for files") : status}
+        <main className="min-w-0 flex-1 pb-[calc(96px+env(safe-area-inset-bottom))] md:pb-10">
+          {/* Large-title header */}
+          <header className="sticky top-0 z-20 border-b border-[#ff6a00]/10 bg-[#120904]/80 px-5 pb-3 pt-[calc(12px+env(safe-area-inset-top))] backdrop-blur-xl md:px-10 md:pt-8">
+            <div className="flex items-center justify-between md:hidden">
+              <Link href="/" aria-label="CocoX homepage" className="flex items-center gap-1 text-[15px] text-[#ff9a4a]"><ArrowLeft className="h-4 w-4" /> Home</Link>
+              <span className="font-display text-[11px] font-black tracking-[0.18em]">COCOX <span className="text-[#ff6a00]">SIGN</span></span>
+            </div>
+            <div className="mt-2 flex items-end justify-between gap-3">
+              <AnimatePresence mode="wait">
+                <motion.h1 key={tab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18 }}
+                  className="text-[32px] font-bold tracking-tight" style={{ fontFamily: NATIVE_FONT }}>{titles[tab]}</motion.h1>
+              </AnimatePresence>
+              <span data-testid="status-signer" className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-[#22130a] px-3 py-1 text-[12px] font-semibold">
+                <motion.span className="h-2 w-2 rounded-full" style={{ background: statusColor }}
+                  animate={signing ? { opacity: [1, 0.3, 1] } : { opacity: 1 }} transition={{ duration: 1, repeat: signing ? Infinity : 0 }} />
+                {statusLabel}
               </span>
             </div>
+          </header>
 
-            <div className="mt-5 space-y-3">
-              {slots.map((s, i) => (
-                <FileSlot key={s.key} index={i} slot={s} file={files[s.key]} disabled={signing}
-                  onPick={(f, err) => { cancel(); setFormError(err || ""); setFiles((p) => ({ ...p, [s.key]: f })); }} />
-              ))}
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <label className="block">
-                <span className="flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-[#ffb27a]"><KeyRound className="h-3 w-3" /> Certificate password</span>
-                <input type="password" autoComplete="off" value={password} disabled={signing} onChange={(e) => { cancel(); setPassword(e.target.value); }}
-                  data-testid="input-password" placeholder="Leave empty if none"
-                  className="mt-1.5 w-full rounded-xl border border-[#ff6a00]/30 bg-[#0f0601] px-3 py-3 text-base text-[#fff1e4] outline-none transition focus:border-[#ff6a00] focus:ring-2 focus:ring-[#ff6a00]/30 disabled:opacity-50" />
-              </label>
-              <label className="block">
-                <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-[#ffb27a]">Output name (optional)</span>
-                <input value={outputName} disabled={signing} onChange={(e) => { cancel(); setOutputName(e.target.value); }} data-testid="input-output-name"
-                  placeholder={files.ipa ? files.ipa.name.replace(/\.(ipa|zip)$/i, "") + "_signed" : "MyApp_signed"}
-                  className="mt-1.5 w-full rounded-xl border border-[#ff6a00]/30 bg-[#0f0601] px-3 py-3 text-base text-[#fff1e4] outline-none transition focus:border-[#ff6a00] focus:ring-2 focus:ring-[#ff6a00]/30 disabled:opacity-50" />
-              </label>
-            </div>
-            <p className="mt-2 text-xs text-[#e8c8ad]/60">An empty password only works for certificates exported without one.</p>
-
-            {(isMobile || bigIpa) && status !== "success" && (
-              <div data-testid="text-memory-warning" className="mt-4 flex gap-2 rounded-xl border border-[#ffb27a]/30 bg-[#ffb27a]/10 p-3 text-xs text-[#ffd8b8]">
-                <Smartphone className="h-4 w-4 shrink-0" />
-                {bigIpa ? "This IPA is large. Your browser may run out of memory; close other tabs or use a desktop computer." : "Phones have limited browser memory. Keep this tab open and in front while signing; large apps may fail."}
-              </div>
-            )}
-
+          <div className="mx-auto max-w-2xl px-4 pt-5 md:px-10">
             <AnimatePresence>
-              {(formError || (status === "error" && error)) && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                  data-testid="text-error" role="alert" className="mt-4 overflow-hidden">
-                  <div className="flex gap-2 rounded-xl border border-[#ff3b1f]/50 bg-[#ff3b1f]/15 p-3 text-sm text-[#ffd0c4]">
-                    <TriangleAlert className="h-4 w-4 shrink-0 text-[#ff5a3c]" /> {formError || error}
-                  </div>
-                </motion.div>
-              )}
+              {(formError || (status === "error" && error)) && <Alert testId="text-error">{formError || error}</Alert>}
             </AnimatePresence>
 
-            {signing && (
-              <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-[#ff6a00]/15" aria-label="Signing in progress" role="progressbar">
-                <motion.div className="h-full w-1/3 rounded-full bg-[#ff6a00]" animate={{ x: ["-100%", "300%"] }} transition={{ duration: 1.3, repeat: Infinity, ease: "easeInOut" }} />
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              <motion.div key={tab} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} transition={{ duration: 0.2, ease: "easeOut" }}>
+                {tab === "files" && (
+                  <>
+                    <Group title="Selected app" footer="Files stay in this tab's memory only. Nothing is uploaded; closing the page clears them.">
+                      {files.ipa ? (
+                        <Row icon={<FileArchive className="h-5 w-5" />} title={files.ipa.name} sub={fmtSize(files.ipa.size)} testId="text-file-ipa"
+                          right={<div className="flex items-center gap-2">
+                            <PickButton label="Replace" onClick={() => pick("ipa")} disabled={signing} />
+                            <button type="button" aria-label="Delete selected IPA" data-testid="button-delete-ipa" onClick={() => remove("ipa")} disabled={signing}
+                              className="rounded-full p-2 text-[#ff6b52] transition hover:bg-[#ff3b1f]/15 disabled:opacity-40"><Trash2 className="h-4 w-4" /></button>
+                          </div>} />
+                      ) : (
+                        <Row icon={<Plus className="h-5 w-5" />} title="Import IPA" sub="Choose an .ipa or .zip from your device" onClick={() => pick("ipa")} testId="button-import-ipa"
+                          right={<ChevronRight className="h-4 w-4 text-[#6b4a35]" />} />
+                      )}
+                    </Group>
+                    <Group title="Signed output">
+                      {result ? (
+                        <Row icon={<Check className="h-5 w-5" strokeWidth={3} />} tint="#ffd29a" title={result.name} sub={`${fmtSize(result.blob.size)} · ready to download`} testId="text-result"
+                          right={<PickButton label="Download" onClick={download} />} />
+                      ) : (
+                        <Row icon={<PenTool className="h-5 w-5" />} tint="#4a2e1c" title={<span className="text-[#b88a6a]">No signed IPA yet</span>}
+                          sub="Sign an app to create one" onClick={() => setTab("sign")} right={<ChevronRight className="h-4 w-4 text-[#6b4a35]" />} />
+                      )}
+                    </Group>
+                  </>
+                )}
 
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-              {status === "success" && result ? (
-                <>
-                  <motion.button type="button" onClick={download} data-testid="button-download"
-                    initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} whileTap={{ scale: 0.97 }}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#ff6a00] px-5 py-4 font-display text-xs font-black uppercase tracking-[0.16em] text-[#1a0a00] transition hover:bg-[#ff8a2a]">
-                    <Download className="h-4 w-4" /> Download signed IPA
-                  </motion.button>
-                  <button type="button" onClick={resetAll} data-testid="button-reset"
-                    className="flex items-center justify-center gap-2 rounded-2xl border border-[#ff6a00]/40 px-5 py-4 font-display text-[11px] font-bold uppercase tracking-[0.14em] text-[#ffb27a] transition hover:bg-[#ff6a00]/10">
-                    <RotateCcw className="h-4 w-4" /> Start over
-                  </button>
-                </>
-              ) : signing ? (
-                <>
-                  <div className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#ff6a00]/20 px-5 py-4 font-display text-xs font-bold uppercase tracking-[0.16em] text-[#ffb27a]">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Signing locally
-                  </div>
-                  <button type="button" onClick={cancel} data-testid="button-cancel"
-                    className="flex items-center justify-center gap-2 rounded-2xl border border-[#ff6a00]/40 px-5 py-4 font-display text-[11px] font-bold uppercase tracking-[0.14em] text-[#ffb27a] transition hover:bg-[#ff6a00]/10">
-                    <X className="h-4 w-4" /> Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  <motion.button type="button" onClick={start} data-testid="button-sign" whileTap={{ scale: 0.97 }}
-                    aria-disabled={!ready}
-                    className={`flex-1 rounded-2xl px-5 py-4 font-display text-xs font-black uppercase tracking-[0.16em] transition ${ready ? "bg-[#ff6a00] text-[#1a0a00] shadow-[0_12px_30px_-8px_rgba(255,106,0,0.7)] hover:bg-[#ff8a2a]" : "bg-[#ff6a00]/15 text-[#ffb27a]/60"}`}>
-                    {status === "error" ? "Try signing again" : "Sign IPA"}
-                  </motion.button>
-                  {(status === "error" || files.ipa || files.p12 || files.profile) && (
-                    <button type="button" onClick={resetAll} data-testid="button-reset"
-                      className="flex items-center justify-center gap-2 rounded-2xl border border-[#ff6a00]/40 px-5 py-4 font-display text-[11px] font-bold uppercase tracking-[0.14em] text-[#ffb27a] transition hover:bg-[#ff6a00]/10">
-                      <RotateCcw className="h-4 w-4" /> Reset
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
-            {status === "success" && result && (
-              <p className="mt-3 text-xs text-[#e8c8ad]/70" data-testid="text-result">
-                {result.name} · {fmtSize(result.blob.size)}. Install it with your own sideloading method; it opens only while your certificate stays valid.
-              </p>
-            )}
+                {tab === "certs" && (
+                  <>
+                    <Group title="Signing identity" footer="Validity is not checked here. Apple can revoke a certificate at any time and signed apps then stop opening.">
+                      {(["p12", "profile"] as Slot[]).map((s) => {
+                        const f = files[s];
+                        return (
+                          <Row key={s} icon={s === "p12" ? <FileKey className="h-5 w-5" /> : <FileBadge className="h-5 w-5" />}
+                            tint={f ? "#ff6a00" : "#4a2e1c"} title={SLOT_META[s].label} sub={f ? `${f.name} · ${fmtSize(f.size)}` : `Choose ${SLOT_META[s].hint}`}
+                            testId={`text-file-${s}`}
+                            right={<div className="flex items-center gap-2">
+                              <PickButton label={f ? "Replace" : "Choose"} onClick={() => pick(s)} disabled={signing} testId={`button-pick-${s}`} />
+                              {f && <button type="button" aria-label={`Delete ${SLOT_META[s].label}`} data-testid={`button-delete-${s}`} onClick={() => remove(s)} disabled={signing}
+                                className="rounded-full p-2 text-[#ff6b52] transition hover:bg-[#ff3b1f]/15 disabled:opacity-40"><Trash2 className="h-4 w-4" /></button>}
+                            </div>} />
+                        );
+                      })}
+                    </Group>
+                    <Group title="Password" footer="Leave empty only if the certificate was exported without a password. The password is used in memory for this signing run and never stored.">
+                      <label className="flex items-center gap-3 px-4 py-3">
+                        <Lock className="h-4 w-4 text-[#ff9a4a]" />
+                        <input type="password" autoComplete="off" value={password} disabled={signing} placeholder="Certificate password (optional)"
+                          data-testid="input-password" aria-label="Certificate password"
+                          onChange={(e) => { invalidate(); setPassword(e.target.value); }}
+                          className="w-full bg-transparent text-[16px] text-[#fff1e4] outline-none placeholder:text-[#6b4a35] disabled:opacity-50" />
+                      </label>
+                    </Group>
+                  </>
+                )}
 
-            {logs.length > 0 && (
-              <div className="mt-5">
-                <div className="font-display text-[10px] font-bold uppercase tracking-[0.16em] text-[#ffb27a]/80">Engine log</div>
-                <pre data-testid="text-logs" className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap rounded-xl bg-[#0a0400] p-3 font-mono text-[11px] leading-relaxed text-[#ffd8b8]/80">
-                  {logs.join("\n")}
-                </pre>
-              </div>
-            )}
-          </motion.div>
-        </section>
+                {tab === "sign" && (
+                  <>
+                    <Group title="Checklist">
+                      {(["ipa", "p12", "profile"] as Slot[]).map((s) => (
+                        <Row key={s} icon={files[s] ? <Check className="h-5 w-5" strokeWidth={3} /> : <X className="h-5 w-5" />}
+                          tint={files[s] ? "#ff6a00" : "#4a2e1c"} title={SLOT_META[s].label}
+                          sub={files[s]?.name ?? "Missing"} onClick={() => setTab(s === "ipa" ? "files" : "certs")}
+                          right={<ChevronRight className="h-4 w-4 text-[#6b4a35]" />} />
+                      ))}
+                      <Row icon={<KeyRound className="h-5 w-5" />} tint={password ? "#ff6a00" : "#4a2e1c"} title="Password" sub={password ? "Entered" : "Empty (passwordless certificate)"}
+                        onClick={() => setTab("certs")} right={<ChevronRight className="h-4 w-4 text-[#6b4a35]" />} />
+                    </Group>
+                    <Group title="Output name">
+                      <input value={outputName} disabled={signing} data-testid="input-output-name" aria-label="Output file name"
+                        onChange={(e) => { invalidate(); setOutputName(e.target.value); }}
+                        placeholder={files.ipa ? files.ipa.name.replace(/\.(ipa|zip)$/i, "") + "_signed" : "MyApp_signed"}
+                        className="w-full bg-transparent px-4 py-3.5 text-[16px] text-[#fff1e4] outline-none placeholder:text-[#6b4a35] disabled:opacity-50" />
+                    </Group>
+
+                    {isMobile && status !== "success" && <Alert tone="warn" testId="text-memory-warning">Phones have limited memory. Keep this tab in front; large apps may fail, desktop is more reliable.</Alert>}
+
+                    {signing && (
+                      <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-[#ff6a00]/15" role="progressbar" aria-label="Signing in progress" aria-busy="true">
+                        <motion.div className="h-full w-1/3 rounded-full bg-gradient-to-r from-[#ff6a00] to-[#ffb27a]" animate={{ x: ["-100%", "300%"] }} transition={{ duration: 1.3, repeat: Infinity, ease: "easeInOut" }} />
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      {status === "success" && result ? (
+                        <>
+                          <motion.button type="button" onClick={download} data-testid="button-download" initial={{ scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} whileTap={{ scale: 0.97 }}
+                            className="flex flex-1 items-center justify-center gap-2 rounded-[14px] bg-[#ff6a00] py-4 text-[16px] font-semibold text-[#1a0a00] shadow-[0_12px_30px_-10px_rgba(255,106,0,0.8)]">
+                            <Download className="h-5 w-5" /> Download signed IPA
+                          </motion.button>
+                          <button type="button" onClick={resetAll} data-testid="button-reset" className="flex items-center justify-center gap-2 rounded-[14px] bg-[#22130a] px-5 py-4 text-[15px] font-semibold text-[#ff9a4a] active:scale-95">
+                            <RotateCcw className="h-4 w-4" /> Start over
+                          </button>
+                        </>
+                      ) : signing ? (
+                        <>
+                          <div className="flex flex-1 items-center justify-center gap-2 rounded-[14px] bg-[#ff6a00]/15 py-4 text-[16px] font-semibold text-[#ff9a4a]"><Loader2 className="h-5 w-5 animate-spin" /> Signing on this device</div>
+                          <button type="button" onClick={cancel} data-testid="button-cancel" className="flex items-center justify-center gap-2 rounded-[14px] bg-[#22130a] px-5 py-4 text-[15px] font-semibold text-[#ff6b52] active:scale-95">
+                            <X className="h-4 w-4" /> Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <motion.button type="button" onClick={start} data-testid="button-sign" aria-disabled={missing.length > 0} whileTap={{ scale: 0.97 }}
+                            className={`flex-1 rounded-[14px] py-4 text-[16px] font-semibold transition ${missing.length ? "bg-[#ff6a00]/15 text-[#b88a6a]" : "bg-[#ff6a00] text-[#1a0a00] shadow-[0_12px_30px_-10px_rgba(255,106,0,0.8)]"}`}>
+                            {status === "error" ? "Retry signing" : "Sign IPA"}
+                          </motion.button>
+                          <button type="button" onClick={resetAll} data-testid="button-reset" className="flex items-center justify-center gap-2 rounded-[14px] bg-[#22130a] px-5 py-4 text-[15px] font-semibold text-[#ff9a4a] active:scale-95">
+                            <RotateCcw className="h-4 w-4" /> Reset
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    <p className="mt-3 text-[12.5px] text-[#a7826a]">A signed file does not prove Apple trusts the certificate; revoked certificates stop apps from opening.</p>
+
+                    {logs.length > 0 && (
+                      <div className="mt-6">
+                        <h3 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#b88a6a]">Engine log</h3>
+                        <pre data-testid="text-logs" aria-live="polite" className="max-h-56 overflow-auto whitespace-pre-wrap rounded-[14px] border border-[#ff6a00]/10 bg-[#0b0502] p-3 font-mono text-[11.5px] leading-relaxed text-[#ffd8b8]/80">{logs.join("\n")}</pre>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {tab === "settings" && (
+                  <>
+                    {shortcutCard}
+                    <Group title="Privacy">
+                      <Row icon={<Lock className="h-5 w-5" />} title="No uploads" sub="Signing runs in a local browser worker" />
+                      <Row icon={<KeyRound className="h-5 w-5" />} title="No secret retention" sub="Password and keys live in memory only" />
+                      <Row icon={<Smartphone className="h-5 w-5" />} title="Memory" sub="Large apps sign best on desktop Chrome or Edge" />
+                    </Group>
+                    <Group title="Session">
+                      <Row icon={<Trash2 className="h-5 w-5" />} tint="#ff3b1f" danger title="Clear all files and password" onClick={resetAll} testId="button-clear-session" />
+                    </Group>
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </main>
       </div>
+
+      {/* Bottom tab bar: phone */}
+      <nav role="tablist" aria-label="CocoX Sign sections"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-[#ff6a00]/15 bg-[#160b05]/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
+        <div className="mx-auto flex max-w-lg">
+          {TABS.map(({ id, label, Icon }) => {
+            const active = tab === id;
+            return (
+              <button key={id} type="button" role="tab" aria-selected={active} aria-label={`${label} tab`} data-testid={`tabbar-${id}`}
+                onClick={() => setTab(id)} className="relative flex min-h-[56px] flex-1 flex-col items-center justify-center gap-0.5 pt-1.5">
+                {active && <motion.span layoutId="tab-dot" className="absolute top-0 h-[3px] w-8 rounded-full bg-[#ff6a00]" transition={{ type: "spring", stiffness: 500, damping: 36 }} />}
+                <motion.span animate={{ scale: active ? 1.1 : 1, y: active ? -1 : 0 }}>
+                  <Icon className={`h-[22px] w-[22px] ${active ? "text-[#ff6a00]" : "text-[#8a6650]"}`} />
+                </motion.span>
+                <span className={`text-[10.5px] font-medium ${active ? "text-[#ff9a4a]" : "text-[#8a6650]"}`}>{label}</span>
+                {id === "sign" && signing && <span className="absolute right-[30%] top-2 h-2 w-2 animate-pulse rounded-full bg-[#ff6a00]" />}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

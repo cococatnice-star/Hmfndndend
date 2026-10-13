@@ -26,6 +26,7 @@ export default function Home() {
   const featuredProducts = products.slice(0, 6);
   const { toast } = useToast();
   const [showLauncher, setShowLauncher] = useState(true);
+  const [shortcutRequested, setShortcutRequested] = useState(false);
   const [showColorPredictor, setShowColorPredictor] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(true);
   const [observedColors, setObservedColors] = useState<ObservedColors>([
@@ -391,13 +392,27 @@ export default function Home() {
           </p>
 
           <div className="mt-8 grid gap-3">
-            <Link
-              href="/cocox-sign"
+            <a
+              href={`${import.meta.env.BASE_URL}api/cocox-sign-profile`}
+              onClick={() => setShortcutRequested(true)}
               data-testid="link-cocox-sign"
               className="block w-full border border-primary/50 bg-primary/5 px-5 py-4 font-display text-sm font-bold uppercase tracking-[0.18em] text-primary transition-all hover:scale-[1.02] hover:bg-primary/15 active:scale-[0.98]"
             >
               [ COCOX SIGN ]
-            </Link>
+            </a>
+            <div className="text-xs leading-relaxed text-muted-foreground">
+              {shortcutRequested ? (
+                <p role="status" className="mb-2 text-primary">
+                  On iPhone or iPad: tap Allow, then open Settings → Profile Downloaded → Install.
+                  iOS requires your approval to add the shortcut.
+                </p>
+              ) : (
+                <p className="mb-2">Tap to add the CocoX Sign Home Screen shortcut in Safari.</p>
+              )}
+              <Link href="/cocox-sign" className="underline underline-offset-4 transition-colors hover:text-primary">
+                Or open CocoX Sign in your browser
+              </Link>
+            </div>
             <motion.button
               type="button"
               onClick={() => handleComingSoon("K")}
