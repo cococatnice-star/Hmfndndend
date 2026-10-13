@@ -1,3 +1,4 @@
 - [Production-only context crashes](production-context-crashes.md) — pnpm peer variants can split shared React contexts even when the development preview works.
 - [Large file delivery](large-file-delivery.md) — Library asset registration rejects files larger than 100 MiB; keep large outputs accessible in project Files.
 - [CocoX Sign scope](cocox-sign-scope.md) — user chose a web signer and shortcut-only profile, not the native starter or anti-revoke DNS profile.
+- [Browser test environment](browser-test-environment.md) — downloaded Playwright Chromium can lack shared libraries on NixOS; prefer managed Chromium.
