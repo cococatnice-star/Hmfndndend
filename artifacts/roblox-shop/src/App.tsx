@@ -11,6 +11,7 @@ import { CookieBanner } from '@/components/ui/CookieBanner';
 import Home from '@/pages/Home';
 import Products from '@/pages/Products';
 import ProductDetail from '@/pages/ProductDetail';
+import CocoXSign from '@/pages/CocoXSign';
 
 const queryClient = new QueryClient();
 
@@ -46,7 +47,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <Router />
+          <Switch>
+            <Route path="/cocox-sign" component={CocoXSign} />
+            <Route><Router /></Route>
+          </Switch>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

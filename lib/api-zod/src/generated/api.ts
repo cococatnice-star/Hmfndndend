@@ -9,6 +9,12 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Download the removable CocoX Sign Home Screen shortcut
+ */
+export const DownloadCocoXSignProfileResponse = zod.unknown()
+
+
+/**
  * Returns server health status
  * @summary Health check
  */

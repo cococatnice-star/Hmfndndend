@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>FullScreen</key>
+			<true/>
+			<key>Icon</key>
+			<data>
+			iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC70lE
+			QVR4nO3SMU5EMRTF0Kkp6Ngsm4cNoNDF/nMtnT5+V3n9fL+SP/EF
+			0eILosUXRIsviBZfEC2+IFp8QbT4gmjxBdHiC6LFF0SLL4gWXxAt
+			viBafEG0+IJo8QXR4guixRdEiy+IFl8QLb4gWnxBtPiCaPEF0eIL
+			osUXRIsviBZfEC2+IFp8QbT4gmjxBdHiC6LFF0SLL4gWXxAtviBa
+			fEG0+IJo8QXR4guixRdEiy+IFl8QLb4gWnxBtPiCaPEF0eILosUX
+			RIsviBZfEC2+IFp8QbT4gmjxBdHCHv74/Lqmi/ocfY4+h3XK97uo
+			z9FFfY4u6nP0Ofocxinf76I+Rxf1ObrI9jnMl3fRv5py/aKDply/
+			6KAp1y86aMr1iw6acv2ig6Zcv+igKdcvOmjK9YsOmnL9ooOmXL/o
+			oCnXLzpoyvWLDppy/aKDply/6KAp1y86aMr1iw6acv2ig6aEjzXv
+			YNwLH+XmseYdjHvho9w81ryDcS98lJvHmncw7oWPcvNY8w7GvfBR
+			bh5r3sG4Fz7KzWPNOxj3wke5eax5B+Ne+Cg3jzXvYNwLH+Um80S7
+			l0uYJ9q9XMI80e7lEuaJdi+XME+0e7mEeaLdyyXME+1eLmGeaPdy
+			CfNEu5dLmCfavVzCPNHu5RLmiXYvlzBPtHu5hHmi3cslzBPtXi5h
+			nmj3cgnzRLuXS5gnetgo+JQPze5z9Dn6HH2OPodz5Ydm9zn6HH2O
+			Pkefw7nyQ7P7HH2OPkef4+0/R/z4gmjxBdHiC6LFF0SLL4gWXxAt
+			viBafEG0+IJo8QXR4guixRdEiy+IFl8QLb4gWnxBtPiCaPEF0eIL
+			osUXRIsviBZfEC2+IFp8QbT4gmjxBdHiC6LFF0SLL4gWXxAtviBa
+			fEG0+IJo8QXR4guixRdEiy+IFl8QLb4gWnxBtPiCaPEF0eILosUX
+			RIsviBZfEC2+IFp8QbT4gmjxBdHiC6LFF0SLL4gWXxAtviBafEG0
+			+IJo8QXR+gUpdT1aNk75AwAAAABJRU5ErkJggg==
+			</data>
+			<key>IsRemovable</key>
+			<true/>
+			<key>Label</key>
+			<string>CocoX Sign</string>
+			<key>PayloadDisplayName</key>
+			<string>CocoX Sign shortcut</string>
+			<key>PayloadIdentifier</key>
+			<string>wtf.cocox.sign.webclip</string>
+			<key>PayloadType</key>
+			<string>com.apple.webClip.managed</string>
+			<key>PayloadUUID</key>
+			<string>410D89C0-91AA-4514-B92E-EBCE923DFFF1</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>Precomposed</key>
+			<true/>
+			<key>URL</key>
+			<string>https://coco-x-meow-cheatz--cococatnice.replit.app/cocox-sign</string>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Adds a removable Home Screen shortcut to the CocoX Sign web signer. Does not install a native app, change DNS, install certificates, or bypass certificate revocation.</string>
+	<key>PayloadDisplayName</key>
+	<string>CocoX Sign</string>
+	<key>PayloadIdentifier</key>
+	<string>wtf.cocox.sign.shortcut</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>26089495-0C11-45AC-B8B3-74C0AA1DA952</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

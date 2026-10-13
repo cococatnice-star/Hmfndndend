@@ -11,6 +11,20 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /cocox-sign-profile:
+    get:
+      operationId: downloadCocoXSignProfile
+      summary: Download the removable CocoX Sign Home Screen shortcut
+      responses:
+        "200":
+          description: iOS configuration profile containing only a web clip
+          content:
+            application/x-apple-aspen-config:
+              schema:
+                type: string
+                format: binary
+        "503":
+          description: The shortcut profile is not available
   /healthz:
     get:
       operationId: healthCheck

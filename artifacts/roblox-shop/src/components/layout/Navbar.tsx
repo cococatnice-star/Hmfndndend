@@ -33,24 +33,24 @@ export function Navbar() {
             <div className="hidden md:flex items-center gap-6 text-xs font-display tracking-widest uppercase text-muted-foreground">
               <Link href="/" className="hover:text-primary transition-colors">Home</Link>
               <Link href="/products" className="hover:text-primary transition-colors">Products</Link>
-              <Link href="/products" className="hover:text-primary transition-colors">Referral</Link>
-              <Link href="/products" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <Link href="/products" className="hidden 2xl:inline-flex hover:text-primary transition-colors">Referral</Link>
+              <Link href="/products" className="hidden 2xl:flex items-center gap-1.5 hover:text-primary transition-colors">
                 Partners
                 <span className="text-primary animate-pulse font-bold">[NEW]</span>
               </Link>
-              <Link href="/products" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+              <Link href="/products" className="hidden 2xl:flex items-center gap-1.5 hover:text-primary transition-colors">
                 Status
                 <span className="text-emerald-400 font-bold">[ ONLINE ]</span>
               </Link>
-              <Link href="/products" className="hover:text-primary transition-colors">FunPay</Link>
-              <Link href="/products" className="hover:text-primary transition-colors">Scripts</Link>
+              <Link href="/products" className="hidden 2xl:inline-flex hover:text-primary transition-colors">FunPay</Link>
+              <Link href="/products" className="hidden 2xl:inline-flex hover:text-primary transition-colors">Scripts</Link>
             </div>
           </div>
 
           <div className="flex items-center gap-4 text-muted-foreground">
             <div className="hidden lg:flex flex-col items-end gap-0.5 border-r border-primary/20 pr-4 text-[9px] font-display font-bold uppercase leading-tight tracking-[0.16em] text-primary/80">
               <span>K SIGN IS COMING SOON</span>
-              <span>E SIGN IS COMING SOON</span>
+              <Link href="/cocox-sign" className="hover:text-white transition-colors">COCOX SIGN IS AVAILABLE</Link>
             </div>
 
             <div className="hidden lg:flex items-center gap-2 text-xs font-display tracking-widest uppercase px-3 py-1.5 border border-primary/20 bg-primary/5 text-primary">

@@ -54,7 +54,7 @@ export default function Home() {
     }
   };
 
-  const handleComingSoon = (sign: "E" | "K") => {
+  const handleComingSoon = (sign: "K") => {
     toast({
       title: `${sign} SIGN`,
       description: `${sign} Sign is coming soon.`,
@@ -353,7 +353,7 @@ export default function Home() {
         />
         <div className="absolute right-4 top-4 z-10 text-right font-display text-[9px] font-bold uppercase leading-relaxed tracking-[0.16em] text-primary/80 sm:right-8 sm:top-6 sm:text-xs">
           <div>K SIGN IS COMING SOON</div>
-          <div>E SIGN IS COMING SOON</div>
+          <div>COCOX SIGN IS AVAILABLE</div>
         </div>
         <motion.button
           type="button"
@@ -391,15 +391,13 @@ export default function Home() {
           </p>
 
           <div className="mt-8 grid gap-3">
-            <motion.button
-              type="button"
-              onClick={() => handleComingSoon("E")}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full border border-primary/50 bg-primary/5 px-5 py-4 font-display text-sm font-bold uppercase tracking-[0.18em] text-primary transition-colors hover:bg-primary/15"
+            <Link
+              href="/cocox-sign"
+              data-testid="link-cocox-sign"
+              className="block w-full border border-primary/50 bg-primary/5 px-5 py-4 font-display text-sm font-bold uppercase tracking-[0.18em] text-primary transition-all hover:scale-[1.02] hover:bg-primary/15 active:scale-[0.98]"
             >
-              [ E SIGN SOON ]
-            </motion.button>
+              [ COCOX SIGN ]
+            </Link>
             <motion.button
               type="button"
               onClick={() => handleComingSoon("K")}
@@ -437,7 +435,7 @@ export default function Home() {
         <div className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[130px]" />
         <div className="absolute right-4 top-4 z-10 text-right font-display text-[9px] font-bold uppercase leading-relaxed tracking-[0.16em] text-primary/80 sm:right-8 sm:top-6 sm:text-xs">
           <div>K SIGN IS COMING SOON</div>
-          <div>E SIGN IS COMING SOON</div>
+          <div>COCOX SIGN IS AVAILABLE</div>
         </div>
 
         <div className="relative z-10 w-full max-w-xl border border-primary/30 bg-black/50 p-8 shadow-[0_0_40px_rgba(255,122,0,0.12)] sm:p-12">

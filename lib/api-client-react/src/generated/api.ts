@@ -51,6 +51,83 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export const getDownloadCocoXSignProfileUrl = () => {
+
+
+
+
+  return `/api/cocox-sign-profile`
+}
+
+/**
+ * @summary Download the removable CocoX Sign Home Screen shortcut
+ */
+export const downloadCocoXSignProfile = async ( options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getDownloadCocoXSignProfileUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDownloadCocoXSignProfileQueryKey = () => {
+    return [
+    `/api/cocox-sign-profile`
+    ] as const;
+    }
+
+
+export const getDownloadCocoXSignProfileQueryOptions = <TData = Awaited<ReturnType<typeof downloadCocoXSignProfile>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadCocoXSignProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDownloadCocoXSignProfileQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof downloadCocoXSignProfile>>> = ({ signal }) => downloadCocoXSignProfile({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof downloadCocoXSignProfile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type DownloadCocoXSignProfileQueryResult = NonNullable<Awaited<ReturnType<typeof downloadCocoXSignProfile>>>
+export type DownloadCocoXSignProfileQueryError = ErrorType<void>
+
+
+/**
+ * @summary Download the removable CocoX Sign Home Screen shortcut
+ */
+
+export function useDownloadCocoXSignProfile<TData = Awaited<ReturnType<typeof downloadCocoXSignProfile>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadCocoXSignProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getDownloadCocoXSignProfileQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getHealthCheckUrl = () => {
 
 
