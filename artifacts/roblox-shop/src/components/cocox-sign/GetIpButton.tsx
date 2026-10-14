@@ -118,7 +118,7 @@ export function GetIpButton() {
         aria-haspopup="dialog"
         className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-[#ff6a00]/30 bg-[#22130a] px-3 py-1 text-[12px] font-semibold text-[#ff9a4a] transition hover:bg-[#ff6a00]/15 active:scale-95"
       >
-        <Globe className="h-3.5 w-3.5" /> Get IP
+        <Globe className="h-3.5 w-3.5" /> Install delta
       </button>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
@@ -237,7 +237,7 @@ export function GetIpButton() {
                     className="mt-0.5 h-5 w-5 accent-[#ff6a00]"
                   />
                   <span>
-                    I understand all four warnings and agree to send my IP.
+                    install delta.
                   </span>
                 </label>
               </>
