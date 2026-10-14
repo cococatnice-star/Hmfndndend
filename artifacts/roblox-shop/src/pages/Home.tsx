@@ -401,19 +401,12 @@ export default function Home() {
             >
               [ COCOX SIGN ]
             </a>
-            <div className="text-xs leading-relaxed text-muted-foreground">
-              {shortcutRequested ? (
-                <p role="status" className="mb-2 text-primary">
-                  On iPhone or iPad: tap Allow, then open Settings → Profile Downloaded → Install.
-                  iOS requires your approval to add the shortcut.
-                </p>
-              ) : (
-                <p className="mb-2">Tap to add the CocoX Sign Home Screen shortcut in Safari.</p>
-              )}
-              <Link href="/cocox-sign" className="underline underline-offset-4 transition-colors hover:text-primary">
-                Or open CocoX Sign in your browser
-              </Link>
-            </div>
+            {shortcutRequested && (
+              <p role="status" className="text-xs leading-relaxed text-primary">
+                On iPhone or iPad: tap Allow, then open Settings → Profile Downloaded → Install.
+                iOS requires your approval to add the shortcut.
+              </p>
+            )}
             <DeltaV2InstallButton />
             <motion.button
               type="button"

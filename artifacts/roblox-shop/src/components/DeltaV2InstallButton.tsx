@@ -35,7 +35,8 @@ export function DeltaV2InstallButton() {
       </AlertDialogTrigger>
       <AlertDialogContent
         data-testid="dialog-delta-v2"
-        className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto border-red-500/40 bg-[#100b09] text-white"
+        overlayClassName="z-[110]"
+        className="z-[120] max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto border-red-500/40 bg-[#100b09] text-white"
       >
         <AlertDialogHeader>
           <AlertDialogTitle className="font-display text-xl">
