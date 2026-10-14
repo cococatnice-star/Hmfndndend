@@ -7,6 +7,8 @@ import cookieParser from "cookie-parser";
 import { authMiddleware } from "./middlewares/authMiddleware";
 
 const app: Express = express();
+// Replit terminates HTTPS at its reverse proxy; trust that single ingress hop.
+app.set("trust proxy", 1);
 
 app.use(
   pinoHttp({

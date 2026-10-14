@@ -5,6 +5,26 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface IpShareConsent {
+  nonce: string;
+  expiresAt: string;
+}
+
+export interface IpShareInput {
+  consent: true;
+  /** @pattern ^[0-9]{13}\.[0-9a-f]{64}\.[0-9a-f]{64}$ */
+  nonce: string;
+}
+
+export interface IpShareReport {
+  ip: string;
+  /** @nullable */
+  city: string | null;
+  /** @nullable */
+  state: string | null;
+  delivered: true;
+}
+
 export interface AuthUser {
   id: string;
   /** @nullable */

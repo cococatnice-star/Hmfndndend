@@ -9,6 +9,7 @@ import {
 import { useCocoXSigner, type SignedIpa } from "@/hooks/useCocoXSigner";
 import { useCocoXInstaller } from "@/hooks/useCocoXInstaller";
 import { useAuth } from "@workspace/replit-auth-web";
+import { GetIpButton } from "@/components/cocox-sign/GetIpButton";
 import { InstallPanel, LoginNotice, UPLOAD_DISCLOSURE } from "@/components/cocox-sign/InstallPanel";
 
 const IS_IOS = typeof navigator !== "undefined" &&
@@ -251,11 +252,14 @@ export default function CocoXSign() {
                 <motion.h1 key={tab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18 }}
                   className="text-[32px] font-bold tracking-tight" style={{ fontFamily: NATIVE_FONT }}>{titles[tab]}</motion.h1>
               </AnimatePresence>
+              <div className="flex items-center gap-2">
+              <GetIpButton />
               <span data-testid="status-signer" className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-[#22130a] px-3 py-1 text-[12px] font-semibold">
                 <motion.span className="h-2 w-2 rounded-full" style={{ background: statusColor }}
                   animate={signing ? { opacity: [1, 0.3, 1] } : { opacity: 1 }} transition={{ duration: 1, repeat: signing ? Infinity : 0 }} />
                 {statusLabel}
               </span>
+              </div>
             </div>
           </header>
 

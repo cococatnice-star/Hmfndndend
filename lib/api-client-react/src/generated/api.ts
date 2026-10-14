@@ -27,6 +27,9 @@ import type {
   CocoXUpload,
   DeltaInstallCount,
   HealthStatus,
+  IpShareConsent,
+  IpShareInput,
+  IpShareReport,
   LogoutSuccess,
   MobileTokenExchangeRequest,
   MobileTokenExchangeSuccess
@@ -58,6 +61,154 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetIpShareConsentUrl = () => {
+
+
+
+
+  return `/api/cocox-ip-share/consent`
+}
+
+/**
+ * @summary Prepare a short-lived confirmation token without looking up or sharing an IP
+ */
+export const getIpShareConsent = async ( options?: Parameters<typeof customFetch>[1]): Promise<IpShareConsent> => {
+
+  return customFetch<IpShareConsent>(getGetIpShareConsentUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetIpShareConsentQueryKey = () => {
+    return [
+    `/api/cocox-ip-share/consent`
+    ] as const;
+    }
+
+
+export const getGetIpShareConsentQueryOptions = <TData = Awaited<ReturnType<typeof getIpShareConsent>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIpShareConsent>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetIpShareConsentQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIpShareConsent>>> = ({ signal }) => getIpShareConsent({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIpShareConsent>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetIpShareConsentQueryResult = NonNullable<Awaited<ReturnType<typeof getIpShareConsent>>>
+export type GetIpShareConsentQueryError = ErrorType<void>
+
+
+/**
+ * @summary Prepare a short-lived confirmation token without looking up or sharing an IP
+ */
+
+export function useGetIpShareConsent<TData = Awaited<ReturnType<typeof getIpShareConsent>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIpShareConsent>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetIpShareConsentQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSendIpShareUrl = () => {
+
+
+
+
+  return `/api/cocox-ip-share`
+}
+
+/**
+ * @summary Share only the requesting visitor's public IP after explicit confirmation
+ */
+export const sendIpShare = async (ipShareInput: IpShareInput, options?: Parameters<typeof customFetch>[1]): Promise<IpShareReport> => {
+
+  return customFetch<IpShareReport>(getSendIpShareUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(ipShareInput)
+  }
+);}
+
+
+
+
+
+export const getSendIpShareMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendIpShare>>, TError,{data: BodyType<IpShareInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendIpShare>>, TError,{data: BodyType<IpShareInput>}, TContext> => {
+
+const mutationKey = ['sendIpShare'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendIpShare>>, {data: BodyType<IpShareInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  sendIpShare(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendIpShareMutationResult = NonNullable<Awaited<ReturnType<typeof sendIpShare>>>
+    export type SendIpShareMutationBody = BodyType<IpShareInput>
+    export type SendIpShareMutationError = ErrorType<void>
+
+    /**
+ * @summary Share only the requesting visitor's public IP after explicit confirmation
+ */
+export const useSendIpShare = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendIpShare>>, TError,{data: BodyType<IpShareInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendIpShare>>,
+        TError,
+        {data: BodyType<IpShareInput>},
+        TContext
+      > => {
+      return useMutation(getSendIpShareMutationOptions(options));
+    }
 
 export const getGetCurrentAuthUserUrl = () => {
 

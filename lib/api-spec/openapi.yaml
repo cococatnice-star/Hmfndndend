@@ -11,6 +11,44 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /cocox-ip-share/consent:
+    get:
+      operationId: getIpShareConsent
+      summary: Prepare a short-lived confirmation token without looking up or sharing an IP
+      responses:
+        "200":
+          description: Confirmation token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IpShareConsent"
+        "503":
+          description: Discord bot is unavailable
+  /cocox-ip-share:
+    post:
+      operationId: sendIpShare
+      summary: Share only the requesting visitor's public IP after explicit confirmation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IpShareInput"
+      responses:
+        "200":
+          description: Report delivered to the bot owner's private Discord messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IpShareReport"
+        "400":
+          description: Missing consent or no usable public IP
+        "403":
+          description: Confirmation expired or request came from another website
+        "429":
+          description: Please wait before sending another report
+        "503":
+          description: Lookup or private delivery failed
   /auth/user:
     get:
       operationId: getCurrentAuthUser
@@ -181,6 +219,27 @@ paths:
                 $ref: "#/components/schemas/DeltaInstallCount"
 components:
   schemas:
+    IpShareConsent:
+      type: object
+      required: [nonce, expiresAt]
+      properties:
+        nonce: { type: string }
+        expiresAt: { type: string, format: date-time }
+    IpShareInput:
+      type: object
+      additionalProperties: false
+      required: [consent, nonce]
+      properties:
+        consent: { type: boolean, const: true }
+        nonce: { type: string, pattern: '^[0-9]{13}\.[0-9a-f]{64}\.[0-9a-f]{64}$' }
+    IpShareReport:
+      type: object
+      required: [ip, city, state, delivered]
+      properties:
+        ip: { type: string }
+        city: { type: [string, "null"] }
+        state: { type: [string, "null"] }
+        delivered: { type: boolean, const: true }
     AuthUser:
       type: object
       required: [id, email, firstName, lastName, profileImageUrl]

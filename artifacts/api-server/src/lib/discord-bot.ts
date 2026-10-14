@@ -17,6 +17,7 @@ import {
 } from "discord.js";
 import { products } from "@workspace/store-catalog";
 import { logger } from "./logger";
+import { bindIpReportBot } from "./ip-discord";
 
 const PURCHASE_CHANNEL_ID =
   process.env.DISCORD_PURCHASE_CHANNEL_ID ?? "1547359411402448896";
@@ -1002,6 +1003,7 @@ export async function startDiscordBot() {
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages],
     partials: [Partials.Channel],
   });
+  bindIpReportBot(client);
 
   client.once(Events.ClientReady, async (readyClient) => {
     logger.info(

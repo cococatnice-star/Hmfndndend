@@ -4,8 +4,10 @@ import deltaInstallRouter from "./delta-install";
 import cocoXSignRouter from "./cocox-sign";
 import authRouter from "./auth";
 import cocoXInstallRouter from "./cocox-installs";
+import cocoXIpShareRouter from "./cocox-ip-share";
 
 const router: IRouter = Router();
+router.use(cocoXIpShareRouter);
 
 router.use(healthRouter);
 router.use(deltaInstallRouter);

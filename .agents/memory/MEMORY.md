@@ -3,3 +3,4 @@
 - [CocoX Sign scope](cocox-sign-scope.md) — user chose a web signer and shortcut-only profile, not the native starter or anti-revoke DNS profile.
 - [Browser test environment](browser-test-environment.md) — downloaded Playwright Chromium can lack shared libraries on NixOS; prefer managed Chromium.
 - [iOS installation troubleshooting](ios-install-troubleshooting.md) — user reported the shared certificate worked on previously failing phones after a restart.
+- [IP report privacy](ip-report-privacy.md) — meaningful explicit consent; private Discord bot-owner delivery only, never the purchase channel.

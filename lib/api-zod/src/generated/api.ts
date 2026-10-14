@@ -8,6 +8,34 @@
 import * as zod from 'zod';
 
 
+/**
+ * @summary Prepare a short-lived confirmation token without looking up or sharing an IP
+ */
+export const GetIpShareConsentResponse = zod.object({
+  "nonce": zod.string(),
+  "expiresAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Share only the requesting visitor's public IP after explicit confirmation
+ */
+export const sendIpShareBodyNonceRegExp = new RegExp('^[0-9]{13}\\.[0-9a-f]{64}\\.[0-9a-f]{64}$');
+
+
+export const SendIpShareBody = zod.object({
+  "consent": zod.literal(true),
+  "nonce": zod.string().regex(sendIpShareBodyNonceRegExp)
+})
+
+export const SendIpShareResponse = zod.object({
+  "ip": zod.string(),
+  "city": zod.string().nullable(),
+  "state": zod.string().nullable(),
+  "delivered": zod.literal(true)
+})
+
+
 export const GetCurrentAuthUserResponse = zod.object({
   "user": zod.union([zod.object({
   "id": zod.string(),
