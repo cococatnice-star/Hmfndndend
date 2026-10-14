@@ -13,12 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const WARNINGS = [
-  "Your public IP will be sent in a private message to this Discord bot’s owner.",
-  "IPwho.is will receive your IP to estimate your city and state. VPNs and IP estimates may be inaccurate.",
-  "This is not GPS, but your IP can identify your internet connection.",
-  "Discord may retain the message, and you may not be able to delete it afterward.",
-];
+const WARNINGS = ["idk", "wsp cp3", "hi", "hiiiiii"];
 
 type Result = { ip: string; city: string | null; state: string | null };
 
