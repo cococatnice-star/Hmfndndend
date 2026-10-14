@@ -10,6 +10,7 @@ import { products } from "@/data/products";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { ShieldCheck, Zap, Clock, HeadphonesIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { DeltaV2InstallButton } from "@/components/DeltaV2InstallButton";
 
 const predictionColors = [
   { label: "RED", value: "#ef4444" },
@@ -413,6 +414,7 @@ export default function Home() {
                 Or open CocoX Sign in your browser
               </Link>
             </div>
+            <DeltaV2InstallButton />
             <motion.button
               type="button"
               onClick={() => handleComingSoon("K")}
