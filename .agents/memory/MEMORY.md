@@ -4,3 +4,4 @@
 - [Browser test environment](browser-test-environment.md) — downloaded Playwright Chromium can lack shared libraries on NixOS; prefer managed Chromium.
 - [iOS installation troubleshooting](ios-install-troubleshooting.md) — user reported the shared certificate worked on previously failing phones after a restart.
 - [IP report privacy](ip-report-privacy.md) — meaningful explicit consent; private Discord bot-owner delivery only, never the purchase channel.
+- [CMS profile inspection](cms-profile-inspection.md) — PKCS7 helpers can report empty content for valid embedded CMS payloads; test real CMS-wrapped plists.

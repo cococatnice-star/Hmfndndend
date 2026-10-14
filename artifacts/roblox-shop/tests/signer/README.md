@@ -30,10 +30,16 @@ deployment is created. Ports must be free.
   entitlements, and a CMS signature verified using the generated leaf certificate.
 - Replacement of each input, deletion, password/name changes and session clearing
   remove stale results; canceled workers do not return a late success.
+- Local metadata inspection before the signing worker starts: certificate/profile
+  expiration, matching certificate bytes and team, bundle-ID coverage, device-list
+  limitations, damaged/missing metadata, and compressed binary app/profile plists.
+  Warnings require acknowledgement; replacing inputs clears that acknowledgement.
 - Every page test observes page and worker requests, rejects uploads (all
   non-GET/HEAD requests and request bodies) and non-allowlisted requests
   (including GET query-string uploads), and checks for passwords in logs
   and secret persistence through Web Storage/IndexedDB.
+  The only allowlisted API request is the existing bodyless, queryless
+  `/api/auth/user` GET used by the optional installation panel.
 - The actual API response's MIME type, attachment filename, no-store/nosniff
   headers, and parsed plist: exactly one removable fullscreen Web Clip, no DNS,
   VPN, CA, or other trust/network payloads.

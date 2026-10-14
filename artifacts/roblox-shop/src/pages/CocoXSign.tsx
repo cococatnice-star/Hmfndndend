@@ -11,6 +11,7 @@ import { useCocoXInstaller } from "@/hooks/useCocoXInstaller";
 import { useAuth } from "@workspace/replit-auth-web";
 import { GetIpButton } from "@/components/cocox-sign/GetIpButton";
 import { InstallPanel, LoginNotice, UPLOAD_DISCLOSURE } from "@/components/cocox-sign/InstallPanel";
+import { InspectionPanel } from "@/components/cocox-sign/InspectionPanel";
 
 const IS_IOS = typeof navigator !== "undefined" &&
   (/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
@@ -99,7 +100,6 @@ function PickButton({ label, onClick, disabled, testId }: { label: string; onCli
 /* ---------- page ---------- */
 
 export default function CocoXSign() {
-  const { status, error, logs, result, sign, cancel, download } = useCocoXSigner();
   const installer = useCocoXInstaller();
   const { isAuthenticated, isLoading: authLoading, login } = useAuth();
   const [autoInstall, setAutoInstall] = useState(false);
@@ -113,6 +113,9 @@ export default function CocoXSign() {
   const [password, setPassword] = useState("");
   const [outputName, setOutputName] = useState("");
   const [formError, setFormError] = useState("");
+  const [warningsAcknowledged, setWarningsAcknowledged] = useState(false);
+  const { status, error, logs, result, sign, cancel, download, inspection, inspecting } =
+    useCocoXSigner({ ...files, password });
   const inputs = { ipa: useRef<HTMLInputElement>(null), p12: useRef<HTMLInputElement>(null), profile: useRef<HTMLInputElement>(null) };
 
   const signing = status === "signing";
@@ -121,6 +124,7 @@ export default function CocoXSign() {
 
   // Any change to signing inputs invalidates a running job or a stale result.
   const invalidate = () => {
+    setWarningsAcknowledged(false);
     if (status !== "idle") cancel();
     installer.clear();
     autoAttempted.current = null;
@@ -170,9 +174,17 @@ export default function CocoXSign() {
       return;
     }
     setFormError("");
+    if (inspecting || !inspection) {
+      setFormError("Wait for local certificate and profile inspection before signing.");
+      return;
+    }
+    if (inspection.warnings.length && !warningsAcknowledged) {
+      setFormError("Review and acknowledge the local inspection warnings before signing.");
+      return;
+    }
     installer.clear();
     autoAttempted.current = null;
-    sign({ ipa: files.ipa!, p12: files.p12!, profile: files.profile!, password, outputName: outputName.trim() || undefined });
+    sign({ ipa: files.ipa!, p12: files.p12!, profile: files.profile!, password, outputName: outputName.trim() || undefined }, warningsAcknowledged);
   };
   const resetAll = () => {
     cancel();
@@ -180,6 +192,7 @@ export default function CocoXSign() {
     autoAttempted.current = null;
     setFiles({ ipa: null, p12: null, profile: null });
     setPassword(""); setOutputName(""); setFormError("");
+    setWarningsAcknowledged(false);
   };
 
   const statusLabel = status === "idle" ? (missing.length ? "Not ready" : "Ready") : status === "signing" ? "Signing" : status === "success" ? "Signed" : "Failed";
@@ -299,7 +312,7 @@ export default function CocoXSign() {
 
                 {tab === "certs" && (
                   <>
-                    <Group title="Signing identity" footer="Validity is not checked here. Apple can revoke a certificate at any time and signed apps then stop opening.">
+                    <Group title="Signing identity" footer="Dates and profile matching are inspected locally. Apple revocation status and installation eligibility cannot be verified offline.">
                       {(["p12", "profile"] as Slot[]).map((s) => {
                         const f = files[s];
                         return (
@@ -323,6 +336,8 @@ export default function CocoXSign() {
                           className="w-full bg-transparent text-[16px] text-[#fff1e4] outline-none placeholder:text-[#6b4a35] disabled:opacity-50" />
                       </label>
                     </Group>
+                    <InspectionPanel report={inspection} inspecting={inspecting} acknowledge={warningsAcknowledged}
+                      onAcknowledge={setWarningsAcknowledged} disabled={signing} canAcknowledge={false} />
                   </>
                 )}
 
@@ -344,6 +359,9 @@ export default function CocoXSign() {
                         placeholder={files.ipa ? files.ipa.name.replace(/\.(ipa|zip)$/i, "") + "_signed" : "MyApp_signed"}
                         className="w-full bg-transparent px-4 py-3.5 text-[16px] text-[#fff1e4] outline-none placeholder:text-[#6b4a35] disabled:opacity-50" />
                     </Group>
+
+                    <InspectionPanel report={inspection} inspecting={inspecting} acknowledge={warningsAcknowledged}
+                      onAcknowledge={checked => { setWarningsAcknowledged(checked); setFormError(""); }} disabled={signing} canAcknowledge={!missing.length} />
 
                     <Group title="Installation" footer={UPLOAD_DISCLOSURE}>
                       <label className="flex cursor-pointer items-center gap-3 px-4 py-3.5">
@@ -383,9 +401,11 @@ export default function CocoXSign() {
                         </>
                       ) : (
                         <>
-                          <motion.button type="button" onClick={start} data-testid="button-sign" aria-disabled={missing.length > 0} whileTap={{ scale: 0.97 }}
+                          <motion.button type="button" onClick={start} data-testid="button-sign"
+                            disabled={!missing.length && (inspecting || !inspection || (!!inspection.warnings.length && !warningsAcknowledged))}
+                            aria-disabled={missing.length > 0 || inspecting || !inspection || (!!inspection.warnings.length && !warningsAcknowledged)} whileTap={{ scale: 0.97 }}
                             className={`flex-1 rounded-[14px] py-4 text-[16px] font-semibold transition ${missing.length ? "bg-[#ff6a00]/15 text-[#b88a6a]" : "bg-[#ff6a00] text-[#1a0a00] shadow-[0_12px_30px_-10px_rgba(255,106,0,0.8)]"}`}>
-                            {status === "error" ? "Retry signing" : "Sign IPA"}
+                            {inspecting ? "Inspecting locally…" : status === "error" ? "Retry signing" : "Sign IPA"}
                           </motion.button>
                           <button type="button" onClick={resetAll} data-testid="button-reset" className="flex items-center justify-center gap-2 rounded-[14px] bg-[#22130a] px-5 py-4 text-[15px] font-semibold text-[#ff9a4a] active:scale-95">
                             <RotateCcw className="h-4 w-4" /> Reset

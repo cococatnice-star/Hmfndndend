@@ -17,7 +17,7 @@ const test = base.extend<{ privatePage: Page }>({
       const url = new URL(request.url());
       const staticLocal = url.origin === "http://127.0.0.1:5189" && !url.search &&
         (/^\/assets\/[\w.-]+$/.test(url.pathname) ||
-          ["/cocox-sign", "/cocox-sign-icon.png", "/favicon.svg",
+          ["/cocox-sign", "/cocox-sign-icon.png", "/favicon.svg", "/api/auth/user",
             "/cocox-sign-runtime/worker.js", "/cocox-sign-runtime/zsign-mobile.js",
             "/cocox-sign-runtime/zsign-mobile.wasm"].includes(url.pathname));
       const staticFont = [
@@ -40,12 +40,16 @@ const test = base.extend<{ privatePage: Page }>({
       (window as any).__signerAudit = state;
       const NativeWorker = window.Worker;
       window.Worker = class extends NativeWorker {
+        private signingWorker: boolean;
         constructor(url: string | URL, options?: WorkerOptions) {
           super(url, options);
-          state.created++;
-          this.addEventListener("message", event => state.messages.push(event.data.type));
+          this.signingWorker = String(url).includes("/cocox-sign-runtime/worker.js");
+          if (this.signingWorker) {
+            state.created++;
+            this.addEventListener("message", event => state.messages.push(event.data.type));
+          }
         }
-        terminate() { state.terminated++; super.terminate(); }
+        terminate() { if (this.signingWorker) state.terminated++; super.terminate(); }
       };
       const setItem = Storage.prototype.setItem;
       Storage.prototype.setItem = function (key, value) {
@@ -66,10 +70,11 @@ const test = base.extend<{ privatePage: Page }>({
     expect(leakedLogs).toEqual([]);
     expect(await page.evaluate(() => (window as any).__signerAudit.storageWrites),
       "Signer must not persist credentials to browser storage").toEqual([]);
-    expect([...runtimeRequests].sort()).toEqual([
+    const audit = await page.evaluate(() => (window as any).__signerAudit);
+    expect([...runtimeRequests].sort()).toEqual(audit.created > 0 ? [
       "/cocox-sign-runtime/worker.js", "/cocox-sign-runtime/zsign-mobile.js",
       "/cocox-sign-runtime/zsign-mobile.wasm",
-    ]);
+    ] : []);
   },
 });
 
@@ -82,6 +87,9 @@ async function selectFiles(page: Page, ipa = "small.ipa", p12 = "blank.p12") {
 
 async function sign(page: Page) {
   await byId(page, "tab-sign").click();
+  await expect(byId(page, "inspection-panel")).not.toContainText("Inspecting on this device");
+  const acknowledgement = byId(page, "checkbox-inspection-warnings");
+  if (await acknowledgement.count()) await acknowledgement.check();
   await byId(page, "button-sign").click();
 }
 
@@ -198,6 +206,62 @@ test("deleting an input and changing password/output name invalidate results; cl
   await expect(byId(page, "text-file-profile")).toContainText("Choose .mobileprovision");
   await expect(byId(page, "button-delete-p12")).toHaveCount(0);
   await expect(byId(page, "button-delete-profile")).toHaveCount(0);
+});
+
+test("local inspection shows expiration, matching identity and coverage before any signing worker starts", async ({ privatePage: page }) => {
+  await selectFiles(page);
+  await byId(page, "tab-sign").click();
+  await expect(byId(page, "inspection-certificate")).toContainText("Synthetic Regression Only");
+  await expect(byId(page, "inspection-profile")).toContainText("TESTTEAM01.test.synthetic");
+  await expect(byId(page, "inspection-profile")).toContainText("1 listed device");
+  await expect(byId(page, "inspection-bundles")).toContainText("test.synthetic");
+  await expect(byId(page, "inspection-match")).toContainText("Matches the selected certificate");
+  await expect(byId(page, "inspection-warnings")).toContainText("expires within 7 days");
+  await expect(byId(page, "inspection-panel")).toContainText("do not verify Apple revocation status");
+  await expect(byId(page, "button-sign")).toBeDisabled();
+  expect(await page.evaluate(() => (window as any).__signerAudit.created)).toBe(0);
+  await byId(page, "checkbox-inspection-warnings").check();
+  await expect(byId(page, "button-sign")).toBeEnabled();
+  await byId(page, "input-profile").setInputFiles(fixture("mismatch.mobileprovision"));
+  await expect(byId(page, "checkbox-inspection-warnings")).not.toBeChecked();
+  await expect(byId(page, "inspection-warnings")).toContainText("Certificate/profile mismatch");
+  await expect(byId(page, "inspection-match")).toContainText("Does not match");
+  await expect(byId(page, "button-sign")).toBeDisabled();
+});
+
+for (const [profile, warning] of [
+  ["expired", "Provisioning profile has expired"],
+  ["wrong-bundle", "does not cover app bundle ID test.synthetic"],
+  ["wrong-team", "Team mismatch"],
+  ["no-devices", "lists no devices"],
+  ["missing-dates", "expiration could not be read"],
+  ["damaged", "Provisioning profile could not be inspected"],
+]) {
+  test(`warn before signing with ${profile} profile`, async ({ privatePage: page }) => {
+    await selectFiles(page);
+    await byId(page, "input-profile").setInputFiles(fixture(`${profile}.mobileprovision`));
+    await byId(page, "tab-sign").click();
+    await expect(byId(page, "inspection-warnings")).toContainText(warning);
+    await expect(byId(page, "button-sign")).toBeDisabled();
+    expect(await page.evaluate(() => (window as any).__signerAudit.created)).toBe(0);
+  });
+}
+
+test("expired certificate warns independently of a profile's dates", async ({ privatePage: page }) => {
+  await selectFiles(page, "small.ipa", "expired.p12");
+  await byId(page, "tab-sign").click();
+  await expect(byId(page, "inspection-warnings")).toContainText("Certificate has expired");
+  await expect(byId(page, "inspection-warnings")).toContainText("Certificate/profile mismatch");
+});
+
+test("binary compressed app plist and binary wildcard profile are inspected locally", async ({ privatePage: page }) => {
+  await selectFiles(page, "binary.ipa");
+  await byId(page, "input-profile").setInputFiles(fixture("wildcard.mobileprovision"));
+  await byId(page, "tab-sign").click();
+  await expect(byId(page, "inspection-bundles")).toContainText("test.synthetic");
+  await expect(byId(page, "inspection-match")).toContainText("Matches the selected certificate");
+  await expect(byId(page, "inspection-warnings")).not.toContainText("does not cover");
+  await expect(byId(page, "inspection-warnings")).not.toContainText("could not be inspected");
 });
 
 test("shortcut-only API sends a removable Web Clip attachment with no DNS or trust payloads", async ({ request }) => {

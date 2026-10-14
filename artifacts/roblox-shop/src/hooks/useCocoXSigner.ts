@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { InspectionInputs, SigningInspection } from "@/lib/cocox-inspection";
 
 export interface SigningInputs {
   ipa: File;
@@ -14,8 +15,13 @@ export interface SignedIpa {
   metadata?: { bundleId?: string; version?: string; title?: string };
 }
 
-export function useCocoXSigner() {
+export function useCocoXSigner(inspectInputs: InspectionInputs) {
   const worker = useRef<Worker | null>(null);
+  const [checked, setChecked] = useState<{ inputs: InspectionInputs; report: SigningInspection } | null>(null);
+  const sameInputs = (a: InspectionInputs, b: InspectionInputs) =>
+    a.ipa === b.ipa && a.p12 === b.p12 && a.profile === b.profile && a.password === b.password;
+  const inspection = checked && sameInputs(checked.inputs, inspectInputs) ? checked.report : null;
+  const inspecting = !!(inspectInputs.ipa || inspectInputs.p12 || inspectInputs.profile) && !inspection;
   const [status, setStatus] = useState<"idle" | "signing" | "success" | "error">("idle");
   const [error, setError] = useState("");
   const [logs, setLogs] = useState<string[]>([]);
@@ -32,7 +38,43 @@ export function useCocoXSigner() {
 
   useEffect(() => () => worker.current?.terminate(), []);
 
-  const sign = useCallback((inputs: SigningInputs) => {
+  useEffect(() => {
+    setChecked(null);
+    if (!inspectInputs.ipa && !inspectInputs.p12 && !inspectInputs.profile) return;
+    let instance: Worker | undefined;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    let active = true;
+    const finish = (report: SigningInspection) => {
+      if (!active) return;
+      active = false;
+      instance?.terminate();
+      clearTimeout(timeout);
+      setChecked({ inputs: inspectInputs, report });
+    };
+    const fail = () => finish({ warnings: ["Local inspection is unavailable or timed out. Certificate, expiration and profile coverage could not be checked."], bundleIds: [] });
+    const debounce = setTimeout(() => {
+      try {
+        instance = new Worker(new URL("../lib/cocox-inspection.worker.ts", import.meta.url), { type: "module" });
+        instance.onmessage = ({ data }: MessageEvent<SigningInspection>) => finish(data);
+        instance.onerror = fail;
+        timeout = setTimeout(fail, 30_000);
+        instance.postMessage(inspectInputs);
+      } catch { fail(); }
+    }, 350);
+    return () => {
+      active = false;
+      clearTimeout(debounce);
+      clearTimeout(timeout);
+      instance?.terminate();
+    };
+  }, [inspectInputs.ipa, inspectInputs.p12, inspectInputs.profile, inspectInputs.password]);
+
+  const sign = useCallback((inputs: SigningInputs, warningsAcknowledged = false) => {
+    if (!inspection || !sameInputs(inputs, inspectInputs) || (inspection.warnings.length && !warningsAcknowledged)) {
+      setError("Wait for local inspection and acknowledge its warnings before signing.");
+      setStatus("error");
+      return;
+    }
     worker.current?.terminate();
     setStatus("signing");
     setError("");
@@ -73,7 +115,7 @@ export function useCocoXSigner() {
       setStatus("error");
       setError("This browser could not start local signing. Try a current desktop Chrome or Edge browser.");
     }
-  }, []);
+  }, [inspection, inspectInputs]);
 
   const download = useCallback(() => {
     if (!result) return;
@@ -87,5 +129,5 @@ export function useCocoXSigner() {
     window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }, [result]);
 
-  return { status, error, logs, result, sign, cancel, download };
+  return { status, error, logs, result, sign, cancel, download, inspection, inspecting };
 }

@@ -1,5 +1,6 @@
 """Disposable, non-installable signing fixtures. Never uses developer credentials."""
 import datetime
+import copy
 import pathlib
 import plistlib
 import secrets
@@ -71,6 +72,31 @@ def generate(root):
     openssl("cms", "-sign", "-binary", "-nodetach", "-in", root / "profile.plist",
             "-signer", cert, "-inkey", key, "-outform", "DER",
             "-out", root / "synthetic.mobileprovision")
+    # Metadata-only variations, always signed by the disposable synthetic identity.
+    def profile_variant(name, modify, binary=False):
+        variant = copy.deepcopy(profile)
+        modify(variant)
+        source = root / f"{name}.plist"
+        source.write_bytes(plistlib.dumps(variant, fmt=plistlib.FMT_BINARY if binary else plistlib.FMT_XML))
+        openssl("cms", "-sign", "-binary", "-nodetach", "-in", source,
+                "-signer", cert, "-inkey", key, "-outform", "DER",
+                "-out", root / f"{name}.mobileprovision")
+
+    profile_variant("expired", lambda p: p.update(ExpirationDate=now - datetime.timedelta(days=1)))
+    profile_variant("wrong-bundle", lambda p: p["Entitlements"].update({"application-identifier": "TESTTEAM01.other.app"}))
+    profile_variant("wildcard", lambda p: p["Entitlements"].update({"application-identifier": "TESTTEAM01.test.*"}), binary=True)
+    profile_variant("wrong-team", lambda p: p.update(TeamIdentifier=["OTHERTEAM1"]))
+    profile_variant("no-devices", lambda p: p.pop("ProvisionedDevices"))
+    profile_variant("missing-dates", lambda p: p.pop("ExpirationDate"))
+    openssl("x509", "-req", "-in", root / "leaf.csr", "-CA", ca_cert,
+            "-CAkey", ca_key, "-set_serial", "234567", "-days", "-1", "-out", root / "expired.pem")
+    openssl("pkcs12", "-export", "-inkey", key, "-in", root / "expired.pem",
+            "-out", root / "expired.p12", "-passout", "pass:")
+    openssl("x509", "-req", "-in", root / "leaf.csr", "-CA", ca_cert,
+            "-CAkey", ca_key, "-set_serial", "345678", "-days", "30", "-out", root / "different.pem")
+    different_der = subprocess.check_output(["openssl", "x509", "-in", str(root / "different.pem"), "-outform", "DER"])
+    profile_variant("mismatch", lambda p: p.update(DeveloperCertificates=[different_der]))
+    (root / "damaged.mobileprovision").write_bytes(b"not a CMS profile")
     info = plistlib.dumps({
         "CFBundleIdentifier": "test.synthetic", "CFBundleExecutable": "Synthetic",
         "CFBundleName": "Synthetic", "CFBundleVersion": "1",
@@ -86,6 +112,9 @@ def generate(root):
                 for i in range(32):
                     archive.writestr(f"Payload/Synthetic.app/assets/{i}.bin",
                                      secrets.token_bytes(1024 * 1024))
+    with zipfile.ZipFile(root / "binary.ipa", "w", zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("Payload/Synthetic.app/Info.plist", plistlib.dumps(plistlib.loads(info), fmt=plistlib.FMT_BINARY))
+        archive.writestr("Payload/Synthetic.app/Synthetic", macho())
     (root / "broken.ipa").write_bytes(b"not a ZIP archive")
     for path in root.iterdir():
         path.chmod(0o600)
