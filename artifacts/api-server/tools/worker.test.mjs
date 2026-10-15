@@ -3,6 +3,32 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 const source = await readFile(new URL("../../../generated-artifacts/cocox-worker.js", import.meta.url), "utf8");
 const { default: worker } = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
+test("only browser visits to the cocox.wtf homepage show the animated blocked page", async () => {
+  for (const headers of [{ accept: "text/html" }, { "sec-fetch-dest": "document" }]) {
+    const blocked = await worker.fetch(new Request("https://cocox.wtf/", { headers }));
+    assert.equal(blocked.status, 403);
+    assert.match(blocked.headers.get("content-type"), /^text\/html/);
+    assert.equal(blocked.headers.get("cache-control"), "no-store");
+    const html = await blocked.text();
+    assert.match(html, /You have been<br><span>blocked/);
+    assert.match(html, /CocoX Security/);
+    assert.match(html, /prefers-reduced-motion/);
+    assert.match(html, /@keyframes/);
+    assert.equal(/<script|https?:\/\//.test(html), false);
+  }
+  const lua = await worker.fetch(new Request("https://cocox.wtf/"));
+  assert.equal(lua.status, 200);
+  assert.match(await lua.text(), /local /);
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response("original website");
+  try {
+    const other = await worker.fetch(new Request("https://www.cocox.wtf/", {
+      headers: { accept: "text/html", "sec-fetch-dest": "document" },
+    }));
+    assert.equal(other.status, 200);
+    assert.equal(await other.text(), "original website");
+  } finally { globalThis.fetch = realFetch; }
+});
 test("edited Worker retains manifests and legacy Lua, and forwards named GET/POST without recursion or caching", async () => {
   const rootManifest = await worker.fetch(new Request("https://cocox.wtf/manifest.plist"));
   const deltaManifest = await worker.fetch(new Request("https://cocox.wtf/api/manifest.plist"));

@@ -8,3 +8,4 @@
 - [Launcher confirmation verification](launcher-confirmation-verification.md) — test opened confirmations and clickable controls in production, not only initial screenshots or DOM visibility.
 - [CMS profile inspection](cms-profile-inspection.md) — PKCS7 helpers can report empty content for valid embedded CMS payloads; test real CMS-wrapped plists.
 - [Script licensing policy](script-licensing-policy.md) — first redeemer owns each key; keep bot actions production-bound and preserve encryption-secret continuity.
+- [Cloudflare homepage scope](cloudflare-homepage-scope.md) — the blocked-page request is for cocox.wtf only, not the underlying Replit website.
