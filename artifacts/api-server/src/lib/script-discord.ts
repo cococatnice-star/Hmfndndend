@@ -129,7 +129,7 @@ function keyAttachment(name: string, values: string[]) {
   )).setName(filename);
 }
 function workerAttachment() {
-  return new AttachmentBuilder(Buffer.from(workerSource)).setName("cocox-worker.js");
+  return new AttachmentBuilder(Buffer.from(workerSource)).setName("hhhh.js");
 }
 
 export function isScriptInteraction(interaction: Interaction) {
@@ -192,7 +192,7 @@ export async function handleScriptInteraction(interaction: Interaction, options:
       await interaction.channel.send(codeRedeemerPanel(script));
       const licenses = await db.select().from(scriptKeysTable).where(eq(scriptKeysTable.scriptId, script.id));
       await interaction.editReply({
-        content: `Code Redeemer panel posted for ${escapeMarkdown(script.name)}. Your private key file and updated Cloudflare Worker are attached; never post them in the channel. Paste cocox-worker.js into your Cloudflare Worker, and publish this Replit update, to enable the loader links.${script.roleId ? "" : " Get Role is disabled until you choose the optional role."}`,
+        content: `Code Redeemer panel posted for ${escapeMarkdown(script.name)}. Your private key file and updated Cloudflare Worker are attached; never post them in the channel. Paste hhhh.js into your Cloudflare Worker, and publish this Replit update, to enable the loader links.${script.roleId ? "" : " Get Role is disabled until you choose the optional role."}`,
         files: [keyAttachment(script.name, licenses.map(key => decryptScriptKey(key.encryptedKey, key.id))), workerAttachment()],
         allowedMentions: { parse: [] },
       });
@@ -219,7 +219,7 @@ export async function handleScriptInteraction(interaction: Interaction, options:
         throw error;
       }
       await interaction.editReply({
-        content: `Created **${escapeMarkdown(result.script.name)}** with 90 keys.\nLoader: https://cocox.wtf/${result.script.slug}\nUse \`/show panel\` and choose this script to post its Code Redeemer panel. Keys and your updated Worker are attached privately; recover them by running /show panel again.\nPaste cocox-worker.js into your Cloudflare Worker and publish this Replit update to enable the new links. Existing embedded Lua and both IPA manifests are preserved.${roleId ? "" : "\nChoose an optional role in /show panel to enable Get Role."}`,
+        content: `Created **${escapeMarkdown(result.script.name)}** with 90 keys.\nLoader: https://cocox.wtf/${result.script.slug}\nUse \`/show panel\` and choose this script to post its Code Redeemer panel. Keys and your updated Worker are attached privately; recover them by running /show panel again.\nPaste hhhh.js into your Cloudflare Worker and publish this Replit update to enable the new links. Existing embedded Lua and both IPA manifests are preserved.${roleId ? "" : "\nChoose an optional role in /show panel to enable Get Role."}`,
         files: [keyAttachment(result.script.name, result.keys), workerAttachment()],
         allowedMentions: { parse: [] },
       });

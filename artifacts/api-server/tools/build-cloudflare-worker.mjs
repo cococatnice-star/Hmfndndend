@@ -10,7 +10,7 @@ export async function buildCloudflareWorker() {
     logLevel: "silent",
   });
   const source = result.outputFiles[0].text;
-  const output = fileURLToPath(new URL("../../../generated-artifacts/cocox-worker.js", import.meta.url));
+  const output = fileURLToPath(new URL("../../../generated-artifacts/hhhh.js", import.meta.url));
   await mkdir(path.dirname(output), { recursive: true });
   await writeFile(output, source);
   return source;

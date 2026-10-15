@@ -91,7 +91,7 @@ test("upload persists private Lua and returns 90 keys plus edited Worker only ep
     assert.equal(values.length, 90);
     assert.equal(new Set(values).size, 90);
     key = values[0];
-    assert.equal(upload.state.reply.files[1].name, "cocox-worker.js");
+    assert.equal(upload.state.reply.files[1].name, "hhhh.js");
     script = (await findGuildScript(guildId, "Setup Fixture"))!;
     assert.ok(script);
     assert.equal(script.roleId, null);

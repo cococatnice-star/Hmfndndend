@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-const source = await readFile(new URL("../../../generated-artifacts/cocox-worker.js", import.meta.url), "utf8");
+const source = await readFile(new URL("../../../generated-artifacts/hhhh.js", import.meta.url), "utf8");
 const { default: worker } = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
 test("browser visits to cocox.wtf page paths are blocked instead of loading Meow Cheatz", async () => {
   for (const pathname of ["/", "/234j", "/234j/", "/random/nested/path", "/a2jb2c3d", "/products"]) {
