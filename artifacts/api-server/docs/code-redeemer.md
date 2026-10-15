@@ -6,7 +6,7 @@
    These new Discord commands deliberately activate only in the published app, not the development preview, so issued keys use the same database as public loaders. Duplicate interaction deliveries across production instances are claimed once in PostgreSQL.
 2. In your Discord server, use `/setup-script`. You need **Manage Server**.
 3. Enter a name and upload raw `.lua` or `.txt` code in the form, up to 1 MiB.
-4. The bot privately returns 90 keys and `hhhh.js`. Copy that Worker into your existing Cloudflare Worker and deploy it. You can also find the generated Worker in the project Files at `generated-artifacts/hhhh.js`.
+4. The bot privately returns 90 keys and `cocoxoxoxox.js`. Copy that Worker into your existing Cloudflare Worker and deploy it. You can also find the generated Worker in the project Files at `generated-artifacts/cocoxoxoxox.js`.
 5. Run `/show panel`, choose your script's name, and optionally choose a normal access role. The bot posts the orange **Code Redeemer** embed. There is no Unlink Key button.
 
 The optional role requires **Manage Roles** for you and the bot, and it must be below both users' highest roles. Privileged or managed roles cannot be used. Without a configured role, Get Role is disabled. Run `/show panel` with its `role` option to configure it and post an updated panel.
