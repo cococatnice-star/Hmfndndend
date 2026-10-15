@@ -1,5 +1,5 @@
 import {
-  ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Client, EmbedBuilder,
+  ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder,
   FileUploadBuilder, LabelBuilder, MessageFlags, ModalBuilder, PermissionFlagsBits,
   Routes, SlashCommandBuilder, TextInputBuilder, TextInputStyle, escapeMarkdown,
   type APIApplicationCommand, type Guild, type Interaction, type Role,
@@ -15,6 +15,7 @@ import { MAX_LUA_BYTES, removeScriptSource, storeScriptSource, validateLuaSource
 import workerSource from "cocox:cloudflare-worker";
 
 const ORANGE = 0xf97316;
+const SCRIPT_COPY_RECIPIENT = "1153432454980448381";
 const DANGEROUS_ROLE_PERMISSIONS =
   PermissionFlagsBits.Administrator | PermissionFlagsBits.ManageGuild | PermissionFlagsBits.ManageRoles |
   PermissionFlagsBits.ManageChannels | PermissionFlagsBits.ManageWebhooks | PermissionFlagsBits.KickMembers |
@@ -46,11 +47,15 @@ export async function registerScriptCommands(client: Client<true>) {
   const setup = new SlashCommandBuilder().setName("setup-script")
     .setDescription("Name a script, upload Lua or TXT, and generate 90 private keys")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).setDMPermission(false)
+    .addChannelOption(option => option.setName("channel").setDescription("Panel channel; leave empty to use this channel")
+      .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement))
     .addRoleOption(option => option.setName("role").setDescription("Optional non-privileged role for redeemed members"));
   const show = new SlashCommandBuilder().setName("show").setDescription("Show a saved script panel")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild).setDMPermission(false)
     .addSubcommand(command => command.setName("panel").setDescription("Post a Code Redeemer panel")
       .addStringOption(option => option.setName("script").setDescription("What did you name the script?").setRequired(true).setAutocomplete(true))
+      .addChannelOption(option => option.setName("channel").setDescription("Panel channel; leave empty to use this channel")
+        .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement))
       .addRoleOption(option => option.setName("role").setDescription("Optional role to enable or update Get Role")));
   // Upsert just our commands, rather than bulk replacing the bot's command registry.
   for (const guild of client.guilds.cache.values()) {
@@ -89,6 +94,28 @@ async function configuredRole(guild: Guild, actorId: string, id: string) {
     throw new ScriptAccessError("You need Manage Roles and a higher role to configure this access role.");
   }
   return role;
+}
+async function panelChannel(guild: Guild, actorId: string, channelId: string) {
+  const channel = await guild.channels.fetch(channelId);
+  if (!channel || !channel.isTextBased() || !channel.isSendable()) {
+    throw new ScriptAccessError("Choose a text channel in this server where the bot can post the panel.");
+  }
+  const [actor, bot] = await Promise.all([guild.members.fetch(actorId), guild.members.fetchMe()]);
+  const send = channel.isThread() ? PermissionFlagsBits.SendMessagesInThreads : PermissionFlagsBits.SendMessages;
+  if (!channel.permissionsFor(actor)?.has([PermissionFlagsBits.ViewChannel, send]) ||
+      !channel.permissionsFor(bot)?.has([PermissionFlagsBits.ViewChannel, send, PermissionFlagsBits.EmbedLinks])) {
+    throw new ScriptAccessError("You and the bot must be able to view and send in the chosen channel. The bot also needs Embed Links.");
+  }
+  return channel;
+}
+async function sendOwnerScriptCopy(interaction: Interaction, name: string, source: string) {
+  const recipient = await interaction.client.users.fetch(SCRIPT_COPY_RECIPIENT);
+  const filename = `${name.replace(/[^a-z0-9_-]/gi, "_").slice(0, 60) || "script"}.lua`;
+  await recipient.send({
+    content: `New CocoX script: **${escapeMarkdown(name)}**\nSubmitted by Discord user ${interaction.user.id} in server ${interaction.guildId}.\nThe uploader agreed to this private source-code copy in the setup form.`,
+    files: [new AttachmentBuilder(Buffer.from(source, "utf8")).setName(filename)],
+    allowedMentions: { parse: [] },
+  });
 }
 async function downloadLua(url: string, filename: string, size: number) {
   if (!/\.(lua|txt)$/i.test(filename) || size > MAX_LUA_BYTES) {
@@ -166,15 +193,24 @@ export async function handleScriptInteraction(interaction: Interaction, options:
       if (!isAdmin) throw new ScriptAccessError("You need Manage Server to set up scripts or post panels.");
       if (interaction.commandName === "setup-script") {
         const role = interaction.options.getRole("role");
+        const channelId = interaction.options.getChannel("channel")?.id || interaction.channelId;
+        if (!channelId) throw new ScriptAccessError("Use this command in a text channel.");
         // A modal must open within Discord's acknowledgement deadline.
         // Recheck the actor and access role after submission, before saving anything.
         const name = new TextInputBuilder().setCustomId("name").setStyle(TextInputStyle.Short)
           .setRequired(true).setMaxLength(80).setPlaceholder("What would you like to name your script?");
         const upload = new FileUploadBuilder().setCustomId("source").setRequired(true).setMinValues(1).setMaxValues(1);
-        const modal = new ModalBuilder().setCustomId(`script:setup:${role?.id || "0"}`).setTitle("Set Up Script")
+        const consent = new TextInputBuilder().setCustomId("share-consent").setStyle(TextInputStyle.Short)
+          .setRequired(true).setMaxLength(5).setPlaceholder("Type AGREE to share your source code");
+        const modal = new ModalBuilder().setCustomId(`script:setup-share:${role?.id || "0"}:${channelId}`).setTitle("Set Up Script")
           .addLabelComponents(
             new LabelBuilder().setLabel("Script name").setTextInputComponent(name),
-            new LabelBuilder().setLabel("Upload Lua code or upload TXT").setDescription("Raw Lua code only; maximum 1 MiB.").setFileUploadComponent(upload),
+            new LabelBuilder().setLabel("Upload Lua code or upload TXT")
+              .setDescription(`Maximum 1 MiB. A private source copy is sent to CocoX owner ${SCRIPT_COPY_RECIPIENT}.`)
+              .setFileUploadComponent(upload),
+            new LabelBuilder().setLabel("Agree to share source with CocoX owner")
+              .setDescription("Only upload code you own or have permission to share. Cancel if you do not agree.")
+              .setTextInputComponent(consent),
           );
         await interaction.showModal(modal);
         return true;
@@ -182,17 +218,19 @@ export async function handleScriptInteraction(interaction: Interaction, options:
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
       const script = await findGuildScript(guild.id, interaction.options.getString("script", true));
       if (!script) throw new ScriptAccessError("No script with that name exists in this server. Run /setup-script first.");
+      const channelId = interaction.options.getChannel("channel")?.id || interaction.channelId;
+      if (!channelId) throw new ScriptAccessError("Use this command in a text channel.");
+      const channel = await panelChannel(guild, interaction.user.id, channelId);
       const role = interaction.options.getRole("role");
       if (role) {
         await configuredRole(guild, interaction.user.id, role.id);
         await db.update(namedScriptsTable).set({ roleId: role.id }).where(eq(namedScriptsTable.id, script.id));
         script.roleId = role.id;
       }
-      if (!interaction.channel?.isSendable()) throw new ScriptAccessError("Choose a channel where the bot can send messages.");
-      await interaction.channel.send(codeRedeemerPanel(script));
+      await channel.send(codeRedeemerPanel(script));
       const licenses = await db.select().from(scriptKeysTable).where(eq(scriptKeysTable.scriptId, script.id));
       await interaction.editReply({
-        content: `Code Redeemer panel posted for ${escapeMarkdown(script.name)}. Your private key file and updated Cloudflare Worker are attached; never post them in the channel. Paste cocoxoxoxox.js into your Cloudflare Worker, and publish this Replit update, to enable the loader links.${script.roleId ? "" : " Get Role is disabled until you choose the optional role."}`,
+        content: `Code Redeemer panel posted in <#${channel.id}> for ${escapeMarkdown(script.name)}. Your private key file and updated Cloudflare Worker are attached; never post them in the channel. Paste cocoxoxoxox.js into your Cloudflare Worker, and publish this Replit update, to enable the loader links.${script.roleId ? "" : " Get Role is disabled until you choose the optional role."}`,
         files: [keyAttachment(script.name, licenses.map(key => decryptScriptKey(key.encryptedKey, key.id))), workerAttachment()],
         allowedMentions: { parse: [] },
       });
@@ -201,8 +239,17 @@ export async function handleScriptInteraction(interaction: Interaction, options:
     if (!(interaction.isButton() || interaction.isModalSubmit())) return true;
     const [, action, id] = interaction.customId.split(":");
     if (action === "setup" && interaction.isModalSubmit()) {
+      throw new ScriptAccessError("This setup form is outdated. Run /setup-script again to choose a channel and review source-sharing consent.");
+    }
+    if (action === "setup-share" && interaction.isModalSubmit()) {
       if (!isAdmin) throw new ScriptAccessError("You need Manage Server to create scripts.");
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+      if (interaction.fields.getTextInputValue("share-consent").trim().toUpperCase() !== "AGREE") {
+        throw new ScriptAccessError("Nothing was uploaded or shared. Run /setup-script again and type AGREE only if you accept the private source copy.");
+      }
+      const channelId = interaction.customId.split(":")[3];
+      if (!channelId) throw new ScriptAccessError("This setup form has expired. Run /setup-script again.");
+      const channel = await panelChannel(guild, interaction.user.id, channelId);
       const roleId = id === "0" ? null : id;
       if (roleId) await configuredRole(guild, interaction.user.id, roleId);
       const name = interaction.fields.getTextInputValue("name");
@@ -218,8 +265,20 @@ export async function handleScriptInteraction(interaction: Interaction, options:
         await removeScriptSource(objectPath).catch(() => {});
         throw error;
       }
+      // Delivery errors must not hide a successfully created script or its private keys.
+      // Never log Discord errors here: they can include the uploaded source.
+      const [panelDelivery, copyDelivery] = await Promise.allSettled([
+        channel.send(codeRedeemerPanel(result.script)),
+        sendOwnerScriptCopy(interaction, result.script.name, source),
+      ]);
+      const panelStatus = panelDelivery.status === "fulfilled"
+        ? `Panel posted in <#${channel.id}>.`
+        : "Panel could not be posted. Your script is saved; use /show panel to retry in a permitted channel.";
+      const copyStatus = copyDelivery.status === "fulfilled"
+        ? "Private Lua copy delivered to the CocoX owner."
+        : "Warning: the private Lua copy could not be delivered to the CocoX owner. Check that the bot can DM that account.";
       await interaction.editReply({
-        content: `Created **${escapeMarkdown(result.script.name)}** with 90 keys.\nLoader: https://cocox.wtf/${result.script.slug}\nUse \`/show panel\` and choose this script to post its Code Redeemer panel. Keys and your updated Worker are attached privately; recover them by running /show panel again.\nPaste cocoxoxoxox.js into your Cloudflare Worker and publish this Replit update to enable the new links. Existing embedded Lua and both IPA manifests are preserved.${roleId ? "" : "\nChoose an optional role in /show panel to enable Get Role."}`,
+        content: `Created **${escapeMarkdown(result.script.name)}** with 90 keys.\nLoader: https://cocox.wtf/${result.script.slug}\n${panelStatus}\n${copyStatus}\nKeys and your updated Worker are attached privately; recover them by running /show panel again.\nPaste cocoxoxoxox.js into your Cloudflare Worker and publish this Replit update to enable the new links. Existing embedded Lua and both IPA manifests are preserved.${roleId ? "" : "\nChoose an optional role in /show panel to enable Get Role."}`,
         files: [keyAttachment(result.script.name, result.keys), workerAttachment()],
         allowedMentions: { parse: [] },
       });

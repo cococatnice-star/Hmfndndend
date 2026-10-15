@@ -26,3 +26,19 @@ Treat the secret used to recover stored license keys as persistent business data
 **Why:** members and administrators must retrieve their keys after the original private setup reply is gone. Rotating or removing the shared session secret without migrating the encrypted keys makes that recovery fail.
 
 **How to apply:** migrate encrypted key material before secret rotation or an authentication-provider migration; do not assume invalidating browser sessions is the only effect.
+
+## Always-on hosting
+
+The user wants the Discord bot available 24/7.
+
+**Why:** the user explicitly requested continuous bot operation, not availability only while the website has traffic.
+
+**How to apply:** use always-running production hosting for the gateway connection. Do not treat an active development workflow or an idle-stopping Autoscale deployment as proof of 24/7 availability. Explain ongoing hosting charges before the user confirms publishing.
+
+## Sharing uploaded source
+
+Keep advance disclosure and explicit uploader agreement when forwarding uploaded Lua to the CocoX owner.
+
+**Why:** source uploads may belong to other script creators; the owner's request for a private copy must not silently expose someone else's private code.
+
+**How to apply:** retain consent before any source download or forwarding, keep source out of public panels and logs, and report delivery failures without hiding successfully created keys.
