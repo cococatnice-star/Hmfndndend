@@ -9,6 +9,39 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Get a public Lua bootstrap, not the protected script source
+ */
+export const getNamedScriptLoaderPathSlugRegExp = new RegExp('^[a-z0-9]{8}$');
+
+
+export const GetNamedScriptLoaderParams = zod.object({
+  "slug": zod.coerce.string().regex(getNamedScriptLoaderPathSlugRegExp)
+})
+
+export const GetNamedScriptLoaderResponse = zod.string()
+
+
+/**
+ * @summary Validate a redeemed script key and its device before delivering private Lua
+ */
+export const executeNamedScriptBodySlugRegExp = new RegExp('^[a-z0-9]{8}$');
+export const executeNamedScriptBodyKeyMin = 23;
+export const executeNamedScriptBodyKeyMax = 64;
+
+export const executeNamedScriptBodyHwidMax = 256;
+
+
+
+export const ExecuteNamedScriptBody = zod.object({
+  "slug": zod.string().regex(executeNamedScriptBodySlugRegExp),
+  "key": zod.string().min(executeNamedScriptBodyKeyMin).max(executeNamedScriptBodyKeyMax),
+  "hwid": zod.string().min(1).max(executeNamedScriptBodyHwidMax)
+})
+
+export const ExecuteNamedScriptResponse = zod.string()
+
+
+/**
  * @summary Prepare a short-lived confirmation token without looking up or sharing an IP
  */
 export const GetIpShareConsentResponse = zod.object({

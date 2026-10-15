@@ -11,6 +11,43 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /script-loaders/{slug}:
+    get:
+      operationId: getNamedScriptLoader
+      summary: Get a public Lua bootstrap, not the protected script source
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string, pattern: "^[a-z0-9]{8}$" }
+      responses:
+        "200":
+          description: Lua bootstrap that POSTs its key for authorization
+          content:
+            text/plain:
+              schema: { type: string }
+        "404": { description: Script not found }
+  /script-executions:
+    post:
+      operationId: executeNamedScript
+      summary: Validate a redeemed script key and its device before delivering private Lua
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScriptExecutionInput"
+      responses:
+        "200":
+          description: Authorized Lua source
+          content:
+            text/plain:
+              schema: { type: string }
+        "400": { description: Invalid request }
+        "403": { description: "Invalid, unredeemed, or device-mismatched key" }
+        "404": { description: Script not found }
+        "429": { description: Too many requests }
+        "503": { description: Script storage unavailable }
   /cocox-ip-share/consent:
     get:
       operationId: getIpShareConsent
@@ -219,6 +256,14 @@ paths:
                 $ref: "#/components/schemas/DeltaInstallCount"
 components:
   schemas:
+    ScriptExecutionInput:
+      type: object
+      additionalProperties: false
+      required: [slug, key, hwid]
+      properties:
+        slug: { type: string, pattern: "^[a-z0-9]{8}$" }
+        key: { type: string, minLength: 23, maxLength: 64 }
+        hwid: { type: string, minLength: 1, maxLength: 256 }
     IpShareConsent:
       type: object
       required: [nonce, expiresAt]

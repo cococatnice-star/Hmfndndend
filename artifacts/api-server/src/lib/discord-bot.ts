@@ -18,6 +18,7 @@ import {
 import { products } from "@workspace/store-catalog";
 import { logger } from "./logger";
 import { bindIpReportBot } from "./ip-discord";
+import { handleScriptInteraction, isScriptInteraction, registerScriptCommands } from "./script-discord";
 
 const PURCHASE_CHANNEL_ID =
   process.env.DISCORD_PURCHASE_CHANNEL_ID ?? "1547359411402448896";
@@ -766,6 +767,14 @@ async function handleVerification(
 }
 
 async function handleInteraction(interaction: Interaction) {
+  if (isScriptInteraction(interaction)) {
+    // Public loaders always use the production database. Never let the development
+    // bot race the published bot and issue unusable development-only keys.
+    if (process.env.REPLIT_DEPLOYMENT === "1") {
+      await handleScriptInteraction(interaction, { claim: true });
+    }
+    return;
+  }
   if (
     interaction.isButton() &&
     (interaction.customId === "purchase:start" ||
@@ -1010,6 +1019,16 @@ export async function startDiscordBot() {
       { username: readyClient.user.tag, channelId: PURCHASE_CHANNEL_ID },
       "Discord purchase bot connected",
     );
+    if (process.env.REPLIT_DEPLOYMENT === "1") {
+      try {
+        await registerScriptCommands(readyClient);
+        logger.info("Code Redeemer commands are ready");
+      } catch {
+        logger.warn("Code Redeemer commands could not be registered; check application command permissions");
+      }
+    } else {
+      logger.info("Code Redeemer Discord commands activate in the published deployment only");
+    }
     try {
       await ensurePurchasePanel(readyClient);
       logger.info(

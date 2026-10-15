@@ -32,7 +32,8 @@ import type {
   IpShareReport,
   LogoutSuccess,
   MobileTokenExchangeRequest,
-  MobileTokenExchangeSuccess
+  MobileTokenExchangeSuccess,
+  ScriptExecutionInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -61,6 +62,154 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetNamedScriptLoaderUrl = (slug: string,) => {
+
+
+
+
+  return `/api/script-loaders/${slug}`
+}
+
+/**
+ * @summary Get a public Lua bootstrap, not the protected script source
+ */
+export const getNamedScriptLoader = async (slug: string, options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getGetNamedScriptLoaderUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetNamedScriptLoaderQueryKey = (slug: string,) => {
+    return [
+    `/api/script-loaders/${slug}`
+    ] as const;
+    }
+
+
+export const getGetNamedScriptLoaderQueryOptions = <TData = Awaited<ReturnType<typeof getNamedScriptLoader>>, TError = ErrorType<void>>(slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNamedScriptLoader>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNamedScriptLoaderQueryKey(slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNamedScriptLoader>>> = ({ signal }) => getNamedScriptLoader(slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNamedScriptLoader>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetNamedScriptLoaderQueryResult = NonNullable<Awaited<ReturnType<typeof getNamedScriptLoader>>>
+export type GetNamedScriptLoaderQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get a public Lua bootstrap, not the protected script source
+ */
+
+export function useGetNamedScriptLoader<TData = Awaited<ReturnType<typeof getNamedScriptLoader>>, TError = ErrorType<void>>(
+ slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNamedScriptLoader>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetNamedScriptLoaderQueryOptions(slug,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getExecuteNamedScriptUrl = () => {
+
+
+
+
+  return `/api/script-executions`
+}
+
+/**
+ * @summary Validate a redeemed script key and its device before delivering private Lua
+ */
+export const executeNamedScript = async (scriptExecutionInput: ScriptExecutionInput, options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getExecuteNamedScriptUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(scriptExecutionInput)
+  }
+);}
+
+
+
+
+
+export const getExecuteNamedScriptMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof executeNamedScript>>, TError,{data: BodyType<ScriptExecutionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof executeNamedScript>>, TError,{data: BodyType<ScriptExecutionInput>}, TContext> => {
+
+const mutationKey = ['executeNamedScript'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof executeNamedScript>>, {data: BodyType<ScriptExecutionInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  executeNamedScript(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ExecuteNamedScriptMutationResult = NonNullable<Awaited<ReturnType<typeof executeNamedScript>>>
+    export type ExecuteNamedScriptMutationBody = BodyType<ScriptExecutionInput>
+    export type ExecuteNamedScriptMutationError = ErrorType<void>
+
+    /**
+ * @summary Validate a redeemed script key and its device before delivering private Lua
+ */
+export const useExecuteNamedScript = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof executeNamedScript>>, TError,{data: BodyType<ScriptExecutionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof executeNamedScript>>,
+        TError,
+        {data: BodyType<ScriptExecutionInput>},
+        TContext
+      > => {
+      return useMutation(getExecuteNamedScriptMutationOptions(options));
+    }
 
 export const getGetIpShareConsentUrl = () => {
 

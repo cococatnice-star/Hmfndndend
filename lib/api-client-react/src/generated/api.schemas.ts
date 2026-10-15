@@ -5,6 +5,21 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface ScriptExecutionInput {
+  /** @pattern ^[a-z0-9]{8}$ */
+  slug: string;
+  /**
+     * @minLength 23
+     * @maxLength 64
+     */
+  key: string;
+  /**
+     * @minLength 1
+     * @maxLength 256
+     */
+  hwid: string;
+}
+
 export interface IpShareConsent {
   nonce: string;
   expiresAt: string;
