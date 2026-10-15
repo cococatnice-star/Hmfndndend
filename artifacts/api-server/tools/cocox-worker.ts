@@ -7,8 +7,11 @@ const WEBSITE_ORIGIN = "https://coco-x-meow-cheatz--cococatnice.replit.app";
 export default {
   async fetch(request: Request) {
     const url = new URL(request.url);
+    // Preserve install/profile/API resources, but do not let browser page
+    // navigations (including short script URLs) fall through to Meow Cheatz.
+    const resourcePath = url.pathname === "/manifest.plist" || url.pathname.startsWith("/api/");
     if (
-      url.hostname === "cocox.wtf" && url.pathname === "/" && request.method === "GET" &&
+      url.hostname === "cocox.wtf" && !resourcePath && request.method === "GET" &&
       (request.headers.get("sec-fetch-dest") === "document" ||
         (request.headers.get("accept") || "").includes("text/html"))
     ) {

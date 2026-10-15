@@ -3,9 +3,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 const source = await readFile(new URL("../../../generated-artifacts/cocox-worker.js", import.meta.url), "utf8");
 const { default: worker } = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
-test("only browser visits to the cocox.wtf homepage show the animated blocked page", async () => {
+test("browser visits to cocox.wtf page paths are blocked instead of loading Meow Cheatz", async () => {
+  for (const pathname of ["/", "/234j", "/234j/", "/random/nested/path", "/a2jb2c3d", "/products"]) {
   for (const headers of [{ accept: "text/html" }, { "sec-fetch-dest": "document" }]) {
-    const blocked = await worker.fetch(new Request("https://cocox.wtf/", { headers }));
+    const blocked = await worker.fetch(new Request(`https://cocox.wtf${pathname}`, { headers }));
     assert.equal(blocked.status, 403);
     assert.match(blocked.headers.get("content-type"), /^text\/html/);
     assert.equal(blocked.headers.get("cache-control"), "no-store");
@@ -15,6 +16,14 @@ test("only browser visits to the cocox.wtf homepage show the animated blocked pa
     assert.match(html, /prefers-reduced-motion/);
     assert.match(html, /@keyframes/);
     assert.equal(/<script|https?:\/\//.test(html), false);
+  }
+  }
+  for (const pathname of ["/manifest.plist", "/api/manifest.plist", "/api/script"]) {
+    const resource = await worker.fetch(new Request(`https://cocox.wtf${pathname}`, {
+      headers: { accept: "text/html", "sec-fetch-dest": "document" },
+    }));
+    assert.equal(resource.status, 200);
+    assert.equal((await resource.text()).includes("<title>Blocked · CocoX Security</title>"), false);
   }
   const lua = await worker.fetch(new Request("https://cocox.wtf/"));
   assert.equal(lua.status, 200);
