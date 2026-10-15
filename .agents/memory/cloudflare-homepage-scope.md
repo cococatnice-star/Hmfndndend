@@ -3,8 +3,8 @@ name: Cloudflare blocked-page scope
 description: Domain restriction and browser-path coverage of the CocoX Security blocked page.
 ---
 
-The user requested a fancy “you have been blocked” page “for cocox.wtf nothing else.” They explicitly confirmed that opening paths such as cocox.wtf/234j in a browser must show the blocked page, not Meow Cheatz.
+The user wants the cocox.wtf homepage to load Meow Cheatz normally. They explicitly confirmed that arbitrary paths such as cocox.wtf/234j must instead show the blocked page. The visible blocked-page name remains “CocoX Security”; renaming its code file is separate.
 
-**Why:** the user restricted the change to that domain, and corrected the initial homepage-only interpretation.
+**Why:** the user restricted the change to this domain and clarified that blocking the homepage itself prevented the intended Meow Cheatz website from loading.
 
-**How to apply:** keep this browser-facing change in the Cloudflare Worker, covering arbitrary browser page paths rather than just the homepage. Preserve functional API, Lua-client, and installer requests. Do not replace the main app homepage or apply the blocked page to unrelated domains when revising its appearance.
+**How to apply:** keep the rule in the Cloudflare Worker: proxy the homepage and legitimate app routes to Meow Cheatz, but show CocoX Security for unknown browser page paths and script URLs. Preserve functional API, Lua-client, and installer requests. Do not change the underlying Replit homepage or other hostnames.

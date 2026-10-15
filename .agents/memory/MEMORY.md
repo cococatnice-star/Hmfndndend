@@ -8,4 +8,4 @@
 - [Launcher confirmation verification](launcher-confirmation-verification.md) — test opened confirmations and clickable controls in production, not only initial screenshots or DOM visibility.
 - [CMS profile inspection](cms-profile-inspection.md) — PKCS7 helpers can report empty content for valid embedded CMS payloads; test real CMS-wrapped plists.
 - [Script licensing policy](script-licensing-policy.md) — first redeemer owns each key; keep bot actions production-bound and preserve encryption-secret continuity.
-- [Cloudflare blocked-page scope](cloudflare-homepage-scope.md) — browser paths on cocox.wtf must be blocked, not forwarded to Meow Cheatz; the Replit site stays unchanged.
+- [Cloudflare blocked-page scope](cloudflare-homepage-scope.md) — Meow Cheatz loads at cocox.wtf; unknown browser paths show CocoX Security, without breaking app routes or installers.

@@ -7,13 +7,26 @@ const WEBSITE_ORIGIN = "https://coco-x-meow-cheatz--cococatnice.replit.app";
 export default {
   async fetch(request: Request) {
     const url = new URL(request.url);
-    // Preserve install/profile/API resources, but do not let browser page
-    // navigations (including short script URLs) fall through to Meow Cheatz.
+    const browserPage = request.method === "GET" &&
+      (request.headers.get("sec-fetch-dest") === "document" ||
+        (request.headers.get("accept") || "").includes("text/html"));
+    // Keep real storefront/signer pages usable, including direct visits and
+    // reloads. Unknown page paths and script URLs still show the security page.
+    const websitePath = url.pathname === "/" ||
+      /^\/(?:cocox-sign|products(?:\/[^/]+)?)\/?$/.test(url.pathname);
+    if (url.hostname === "cocox.wtf" && browserPage && websitePath) {
+      const target = new URL(url.pathname + url.search, WEBSITE_ORIGIN);
+      const upstream = await fetch(new Request(target.toString(), request));
+      const headers = new Headers(upstream.headers);
+      headers.set("Cache-Control", "no-store");
+      return new Response(upstream.body, {
+        status: upstream.status, statusText: upstream.statusText, headers,
+      });
+    }
+    // Preserve install/profile/API resources without exposing script URLs as pages.
     const resourcePath = url.pathname === "/manifest.plist" || url.pathname.startsWith("/api/");
     if (
-      url.hostname === "cocox.wtf" && !resourcePath && request.method === "GET" &&
-      (request.headers.get("sec-fetch-dest") === "document" ||
-        (request.headers.get("accept") || "").includes("text/html"))
+      url.hostname === "cocox.wtf" && !resourcePath && browserPage
     ) {
       return new Response(blockedHomePage, {
         status: 403,

@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 const source = await readFile(new URL("../../../generated-artifacts/hhhh.js", import.meta.url), "utf8");
 const { default: worker } = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
-test("browser visits to cocox.wtf page paths are blocked instead of loading Meow Cheatz", async () => {
-  for (const pathname of ["/", "/234j", "/234j/", "/random/nested/path", "/a2jb2c3d", "/products"]) {
+test("unknown browser paths are blocked, while real Meow Cheatz pages stay usable", async () => {
+  for (const pathname of ["/234j", "/234j/", "/random/nested/path", "/a2jb2c3d"]) {
   for (const headers of [{ accept: "text/html" }, { "sec-fetch-dest": "document" }]) {
     const blocked = await worker.fetch(new Request(`https://cocox.wtf${pathname}`, { headers }));
     assert.equal(blocked.status, 403);
@@ -12,7 +12,11 @@ test("browser visits to cocox.wtf page paths are blocked instead of loading Meow
     assert.equal(blocked.headers.get("cache-control"), "no-store");
     const html = await blocked.text();
     assert.match(html, /You have been<br><span>blocked/);
-    assert.match(html, /CocoX Security/);
+    assert.match(html, /<div class="brand">CocoX Security<\/div>/);
+    assert.match(html, /<title>Blocked · CocoX Security<\/title>/);
+    assert.match(html, /CocoX Security has restricted access/);
+    assert.match(html, /PROTECTED BY COCOX SECURITY/);
+    assert.equal(html.includes("hhhh"), false);
     assert.match(html, /prefers-reduced-motion/);
     assert.match(html, /@keyframes/);
     assert.equal(/<script|https?:\/\//.test(html), false);
@@ -29,13 +33,28 @@ test("browser visits to cocox.wtf page paths are blocked instead of loading Meow
   assert.equal(lua.status, 200);
   assert.match(await lua.text(), /local /);
   const realFetch = globalThis.fetch;
-  globalThis.fetch = async () => new Response("original website");
+  const pageRequests = [];
+  globalThis.fetch = async input => {
+    const request = input instanceof Request ? input : new Request(input);
+    pageRequests.push(request.url);
+    return new Response("<!doctype html><title>Meow Cheatz</title>", {
+      headers: { "Content-Type": "text/html" },
+    });
+  };
   try {
+    for (const pathname of ["/", "/?from=homepage", "/products", "/products/1", "/cocox-sign"]) {
+      for (const headers of [{ accept: "text/html" }, { "sec-fetch-dest": "document" }]) {
+        const page = await worker.fetch(new Request(`https://cocox.wtf${pathname}`, { headers }));
+        assert.equal(page.status, 200);
+        assert.match(await page.text(), /<title>Meow Cheatz<\/title>/);
+        assert.equal(pageRequests.at(-1), `https://coco-x-meow-cheatz--cococatnice.replit.app${pathname}`);
+      }
+    }
     const other = await worker.fetch(new Request("https://www.cocox.wtf/", {
       headers: { accept: "text/html", "sec-fetch-dest": "document" },
     }));
     assert.equal(other.status, 200);
-    assert.equal(await other.text(), "original website");
+    assert.match(await other.text(), /<title>Meow Cheatz<\/title>/);
   } finally { globalThis.fetch = realFetch; }
 });
 test("edited Worker retains manifests and legacy Lua, and forwards named GET/POST without recursion or caching", async () => {
