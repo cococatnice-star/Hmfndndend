@@ -30,6 +30,7 @@ export default function Home() {
   const [shortcutRequested, setShortcutRequested] = useState(false);
   const [showColorPredictor, setShowColorPredictor] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(true);
+  const [showConfirmationCode, setShowConfirmationCode] = useState(false);
   const [observedColors, setObservedColors] = useState<ObservedColors>([
     "",
     "",
@@ -46,6 +47,7 @@ export default function Home() {
   });
 
   const handleDeltaInstall = () => {
+    setShowConfirmationCode(true);
     const recorded = navigator.sendBeacon("/api/delta-install");
 
     if (!recorded) {
@@ -403,7 +405,7 @@ export default function Home() {
             </a>
             {shortcutRequested && (
               <p role="status" className="text-xs leading-relaxed text-primary">
-                On iPhone or iPad: tap Allow, then open Settings → Profile Downloaded → Install.
+                On iPhone or iPad: tap Allow, then open Settings â Profile Downloaded â Install.
                 iOS requires your approval to add the shortcut.
               </p>
             )}
@@ -455,6 +457,11 @@ export default function Home() {
           <div className="mt-5 font-display text-sm font-bold uppercase tracking-[0.2em] text-primary">
             [ {deltaInstallData?.count ?? 0} PEOPLE PRESSED YES ]
           </div>
+          {showConfirmationCode && (
+            <p role="status" data-testid="text-delta-confirmation-code" className="mt-3 font-display text-sm font-bold uppercase tracking-[0.2em] text-primary">
+              [ CODE: 39452 ]
+            </p>
+          )}
           <h1 className="mt-4 font-display text-3xl font-black uppercase tracking-tight text-white sm:text-5xl">
             Do You WAnt to Install Delta
           </h1>
@@ -582,7 +589,7 @@ export default function Home() {
               }
               className="w-full sm:w-auto bg-transparent border border-white/20 hover:border-primary text-white font-display font-bold uppercase tracking-widest py-4 px-8 rounded-sm transition-colors flex justify-center items-center gap-2"
             >
-              [ CLIENT PORTAL ↗ ]
+              [ CLIENT PORTAL â ]
             </button>
           </motion.div>
 
@@ -594,16 +601,16 @@ export default function Home() {
           >
             <div className="flex items-center gap-2">
               <span className="text-emerald-400 font-bold">
-                [● SYS: ONLINE]
+                [â SYS: ONLINE]
               </span>
             </div>
             <div className="hidden sm:block text-primary/30">|</div>
             <div className="flex items-center gap-1.5">
-              <span className="text-primary">[★ 100K+ USERS]</span>
+              <span className="text-primary">[â 100K+ USERS]</span>
             </div>
             <div className="hidden sm:block text-primary/30">|</div>
             <div className="flex items-center gap-1.5">
-              <span className="text-primary">[⚡ INSTANT DELIVERY]</span>
+              <span className="text-primary">[â¡ INSTANT DELIVERY]</span>
             </div>
           </motion.div>
 
@@ -648,7 +655,7 @@ export default function Home() {
               href="/products"
               className="hidden sm:flex text-primary font-display text-sm tracking-widest hover:text-white transition-colors items-center gap-1"
             >
-              [ VIEW ALL ↗ ]
+              [ VIEW ALL â ]
             </Link>
           </div>
 
