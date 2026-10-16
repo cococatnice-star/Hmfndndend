@@ -405,7 +405,7 @@ export default function Home() {
             </a>
             {shortcutRequested && (
               <p role="status" className="text-xs leading-relaxed text-primary">
-                On iPhone or iPad: tap Allow, then open Settings â Profile Downloaded â Install.
+                On iPhone or iPad: tap Allow, then open Settings → Profile Downloaded → Install.
                 iOS requires your approval to add the shortcut.
               </p>
             )}
@@ -589,7 +589,7 @@ export default function Home() {
               }
               className="w-full sm:w-auto bg-transparent border border-white/20 hover:border-primary text-white font-display font-bold uppercase tracking-widest py-4 px-8 rounded-sm transition-colors flex justify-center items-center gap-2"
             >
-              [ CLIENT PORTAL â ]
+              [ CLIENT PORTAL ↗ ]
             </button>
           </motion.div>
 
@@ -601,16 +601,16 @@ export default function Home() {
           >
             <div className="flex items-center gap-2">
               <span className="text-emerald-400 font-bold">
-                [â SYS: ONLINE]
+                [● SYS: ONLINE]
               </span>
             </div>
             <div className="hidden sm:block text-primary/30">|</div>
             <div className="flex items-center gap-1.5">
-              <span className="text-primary">[â 100K+ USERS]</span>
+              <span className="text-primary">[★ 100K+ USERS]</span>
             </div>
             <div className="hidden sm:block text-primary/30">|</div>
             <div className="flex items-center gap-1.5">
-              <span className="text-primary">[â¡ INSTANT DELIVERY]</span>
+              <span className="text-primary">[⚡ INSTANT DELIVERY]</span>
             </div>
           </motion.div>
 
@@ -655,7 +655,7 @@ export default function Home() {
               href="/products"
               className="hidden sm:flex text-primary font-display text-sm tracking-widest hover:text-white transition-colors items-center gap-1"
             >
-              [ VIEW ALL â ]
+              [ VIEW ALL ↗ ]
             </Link>
           </div>
 
